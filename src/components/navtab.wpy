@@ -1,0 +1,75 @@
+<template>
+  <form report-submit="true" bindsubmit="toBannerUrl">
+    <view class="navTabBox pre-initShow {{isShow?'initShow':''}}" style="transition: .5s .3s;">
+      <button class="navItem pre-initShow {{isShow?'initShow':''}}" wx:for="{{navTabData}}" wx:key="{{index}}" style="transition: .5s {{index*0.1+0.4}}s" open-type="{{index == 0 ? 'contact' : ''}}" @tap="tobeseapk({{index}})">
+        <image src="{{item.classify_img}}" class="navItemIcon" mode="aspectFill"></image>
+        <text class="navTxt ellip-1">{{item.classify_name}}</text>
+      </button>
+    </view>
+  </form>
+</template>
+<script>
+  import wepy from 'wepy'
+  import api from '../utils/commonMT.js'
+  export default class Banner extends wepy.component {
+    props = {
+      isShow: Boolean,
+      navTabData: Object
+    }
+    computed = {
+    }
+    data = {
+    }
+    components = {
+      
+    }
+    methods = {
+      tobeseapk(index){
+        if(index == 1){
+          api.navTo('../../bespeak/design')
+        }
+        if(index == 2){
+          api.navTo('../../bespeak/measure')
+        }
+        if(index == 3){
+          api.navTo('../../bespeak/quote')
+        }
+      }
+    }
+    onLoad(){
+    }
+  }
+</script>
+<style type="less">
+  .navTabBox{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 70rpx 30rpx;
+    display: flex;
+    background-color: #fff;
+    margin-bottom: 20rpx;
+    .navItem{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 172.5rpx;
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+      border-radius: 0;
+      &::after{
+        content: none;
+      }
+      .navItemIcon{
+        width: 50rpx;
+        height: 50rpx;
+      }
+      .navTxt{
+        font-size: 28rpx;
+        color: #161716;
+        margin-top: 20rpx;
+        max-width: 150rpx;
+      }
+    }
+  }
+</style>

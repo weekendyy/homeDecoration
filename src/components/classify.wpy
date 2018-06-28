@@ -1,0 +1,285 @@
+<template>
+	<view class="classifyBox">
+		<view class="classifyTop pre-initShow {{show?'initShow':''}}">
+			<block wx:for="{{classifyData}}" wx:key="{{index}}">
+				<view class="classifyItem" @tap='classifyTap({{index}})'>
+					<text class="classify-name ellip-1 {{actClassify === index ? 'activeName' : ''}}">{{item.cat_name}}</text>
+					<view class="classifyIcon {{actClassify === index ? 'activeIcon' : ''}}"></view>
+				</view>
+			</block>
+		</view>
+		<!-- 二级分类 -->
+		<view class="classifyContentBox {{(actClassify == -1)?'':'showclassifyContent'}} {{classifyData[actClassify].rank == 1?'':'hideContent'}}">
+			<block wx:for="{{classifyData[actClassify]._child}}" wx:key="{{index}}">
+				<view class="classifySonItem ellip-1 {{classifyData[actClassify].active == index ? 'activeclassifySonItem' : ''}}" @tap="actSonItemTap({{index}},1)">{{item.cat_name}}</view>
+			</block>
+		</view>
+		<!-- 三级分类 -->
+		<view class="classifyContentBox {{(actClassify == -1)?'':'showclassifyContent'}} {{classifyData[actClassify].rank == 2?'':'hideContent'}}">
+			<view class="leftBox">
+				<block wx:for="{{classifyData[actClassify]._child}}" wx:key="{{index}}">
+					<view class="leftBoxItem {{index == classifyData[actClassify].activeTemp ?'activeleftBoxItem':''}} ellip-1" @tap="actClassifyTwoTap({{index}})">{{item.cat_name}}</view>
+				</block>
+			</view>
+			<view class="rightBox">
+				<block wx:for="{{classifyData[actClassify]._child[classifyData[actClassify].activeTemp]._child}}" wx:key="{{index}}">
+					<view class="rightBoxItem ellip-1 {{(index == classifyData[actClassify]._child[0].active && classifyData[actClassify]._child[classifyData[actClassify].activeTemp] == classifyData[actClassify]._child[classifyData[actClassify].active])?'actrightBoxItem':''}}" @tap="actSonItemTap({{index}},2)">{{item.cat_name}}</view>
+				</block>
+				<view class="rightBoxItem" wx:if="{{!classifyData[actClassify]._child[classifyData[actClassify].activeTemp]._child.length && classifyData[actClassify].activeTemp!=0}}">空</view>
+				<view class="rightBoxItem {{classifyData[actClassify].active == 0?'actrightBoxItem':''}}" wx:if="{{!classifyData[actClassify]._child[classifyData[actClassify].activeTemp]._child.length && classifyData[actClassify].activeTemp==0}}" @tap="actSonItemTap(0,2,1)">不限</view>
+			</view>
+		</view>
+		<view class="cover {{(actClassify == -1)?'':'showCover'}}" @tap="closeCover"></view>
+	</view>
+</template>
+<script>
+	import wepy from 'wepy'
+	import api from '../utils/commonMT.js'
+	import worksiteModel from '../pages/workSite/workSiteModel.js'
+	export default class classify extends wepy.component {
+		props = {
+			show: Boolean,
+			classifyData: Object
+		}
+		data = {
+			actClassify: -1,
+			searchData: ''
+		}
+		computed = {
+			
+		}
+		components = {
+			
+		}
+		methods = {
+			classifyTap(index){
+				if(index === this.actClassify){
+					this.actClassify = -1
+					return false
+				}
+				this.actClassify = index
+				this.$apply()
+			},
+			actSonItemTap(index,type,isNolimit){
+				wx.showLoading({
+					title: '加载中...'
+				})
+				this.searchData = ''
+				if(type == 1){
+					let actItem = this.classifyData[this.actClassify]
+					actItem.active = index
+					actItem.cat_name = actItem._child[index].cat_name
+				}
+				if(type == 2){
+					let actItemTwo = this.classifyData[this.actClassify]
+					if(isNolimit == 1){
+						actItemTwo.active = 0
+						actItemTwo._child[0].active = undefined
+						actItemTwo.cat_name = actItemTwo._child[0].cat_name
+					} else {
+						actItemTwo.active = actItemTwo.activeTemp
+						actItemTwo._child[0].active = index
+						if(index == 0){
+							actItemTwo.cat_name = actItemTwo._child[actItemTwo.active].cat_name
+						} else {
+							actItemTwo.cat_name = actItemTwo._child[actItemTwo.active]._child[index].cat_name
+						}
+					}
+				}
+				this.$apply()
+				for(let i=0,len=this.classifyData.length;i<len;i++){
+					let currItem = this.classifyData[i]
+					if(currItem.active && currItem.rank == 1){
+						if(!this.searchData){
+							this.searchData += this.classifyData[i]._child[currItem.active].id
+						} else {
+							this.searchData = this.searchData + '-' + this.classifyData[i]._child[currItem.active].id
+						}
+					} else if(currItem.rank == 2 && currItem._child[0].active || (currItem._child[0].active == 0)){
+						let activeTowIndex = currItem._child[0].active
+						if(!this.searchData){
+							this.searchData += currItem._child[currItem.active]._child[activeTowIndex].id
+						} else {
+							this.searchData = this.searchData + '-' + currItem._child[currItem.active]._child[activeTowIndex].id
+						}
+					}
+				}
+				console.log(this.searchData)
+				let query = {pageNum: 1}
+				if(this.searchData){
+					query.searchData = this.searchData
+				}
+				worksiteModel.getHomeData(query, (res)=>{
+					wx.hideLoading()
+					let data = res
+					if(data.error == 1){
+						data = ''
+					}
+					this.$emit('hideItem')
+					this.$emit('upDateData',data)
+				})
+				this.actClassify = -1
+				this.$apply()
+			},
+			closeCover(){
+				this.actClassify = -1
+				this.$apply()
+			},
+			actClassifyTwoTap(index){
+				let actItem = this.classifyData[this.actClassify]
+				actItem.activeTemp = index
+				this.$apply()
+			}
+		}
+		onLoad(){
+		}
+	}
+</script>
+<style type="less">
+	.classifyBox{
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		width: 100%;
+		.classifyTop{
+			width: 100%;
+			height: 90rpx;
+			display: flex;
+			align-items: center;
+			border-bottom: 1px solid #F0F0F0;
+			background-color: #fff;
+			position: relative;
+			z-index: 10;
+			.classifyItem{
+				flex: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100%;
+				.classify-name{
+					font-size: 32rpx;
+					color: #353535;
+					max-width: 80%;
+				}
+				.activeName{
+					color: #20B7B6;
+				}
+				.classifyIcon{
+					width: 0;
+					height: 0;
+					border-style: solid;
+					border-width: 5px 5px 5px 5px;
+					border-color: #888 transparent transparent transparent;
+					margin-top: 5px;
+					margin-left: 20rpx;
+					transition: .5s;
+					transform-origin: 50% 25%;
+				}
+				.activeIcon{
+					border-color: #20B7B6 transparent transparent transparent;
+					transform: rotateZ(180deg);
+				}
+			}
+		}
+		.classifyContentBox{
+			z-index: 5;
+			position: absolute;
+			top: 0;
+			left: 0;
+			box-sizing: border-box;
+			padding: 0 15rpx;
+			display: flex;
+			flex-wrap: wrap;
+			width: 100%;
+			background-color: #fff;
+			padding-bottom: 20rpx;
+			transition: .5s 0s;
+			.leftBox{
+				width: 220rpx;
+				margin-top: 15rpx;
+				box-sizing: border-box;
+				padding-right: 20rpx;
+				border-right: 1px solid #F2F2F2;
+				.leftBoxItem{
+					width: 105%;
+					height: 90rpx;
+					font-size: 28rpx;
+					color: #2c2c2c;
+					margin-bottom: 2rpx;
+					text-align: left;
+					line-height: 90rpx;
+					box-sizing: border-box;
+					padding-left: 10rpx;
+					border-bottom: 1px solid #F2F2F2;
+				}
+				.activeleftBoxItem{
+					border-bottom:1px solid #49C6AA;
+					color: #49C6AA;
+				}
+			}
+			.rightBox{
+				flex: 1;
+				box-sizing: border-box;
+				padding: 15rpx;
+				padding-left: 30rpx;
+				.rightBoxItem{
+					width: 210rpx;
+					height:60rpx;
+					background-color:#F2F2F2;
+					text-align:center;
+					line-height:60rpx;
+					color:#2C2C2C;
+					font-size:28rpx;
+					margin: 10rpx;
+					display: inline-block;
+				}
+				.actrightBoxItem{
+					color: #48C6A9;
+				}
+				.noneTxt{
+					width: 100%;
+					font-size: 28rpx;
+					text-align: center;
+					line-height: 40rpx;
+					color: #999;
+				}
+			}
+			.classifySonItem{
+				margin: 20rpx 15rpx;
+				flex: 0 0 210rpx;
+				height: 60rpx;
+				background-color: #F2F2F2;
+				text-align: center;
+				line-height: 60rpx;
+				color: #2C2C2C;
+				font-size: 28rpx;
+			}
+			.activeclassifySonItem{
+				color: #4BC3A8;
+			}
+		}
+		.hideContent{
+			height: 0;
+			overflow: hidden;
+		}
+		.showclassifyContent{
+			transform: translateY(90rpx);
+		}
+		.cover{
+			width: 100%;
+			height: 100%;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: rgba(0,0,0,0);
+			pointer-events: none;
+			transition: .4s;
+			z-index: 2;
+		}
+		.showCover{
+			background-color: rgba(0,0,0,.5);
+			pointer-events: auto;
+		}
+	}
+</style>

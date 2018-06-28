@@ -1,0 +1,198 @@
+<template>
+  <import src="../../wxParse/wxParse.wxml"/>
+  <view class="indexBox">
+    <view class="version {{showVersion?'showVersion':''}}">V1.1.1</view>
+    <image src="{{indexData.thumb_img}}" mode="aspectFill" class="aboutPic pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .1s" @longpress="seeVersion" @touchend="hideVersion"></image>
+    <text class="about-title pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .3s">{{indexData.name}}</text>
+    <view class="aboutItem pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .5s">
+      <text class="aboutItem-title">门店地址</text>
+      <view class="aboutItem-content">
+        <text class="content-txt">{{indexData.address}}</text>
+        <view class="content-right" @tap="openMap({{indexData.log_lat}})">
+          <view class="cut"></view>
+          <image src="./images/location.png" mode="widthFix" class="locationIcon"></image>
+        </view>
+      </view>
+    </view>
+    <view class="aboutItem pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .7s">
+      <text class="aboutItem-title">联系电话</text>
+      <view class="aboutItem-content">
+        <text class="content-txt">{{indexData.telephone}}</text>
+        <view class="content-right" @tap="makePhoneCall({{indexData.telephone}})">
+          <view class="cut"></view>
+          <image src="./images/phone.png" mode="widthFix" class="locationIcon"></image>
+        </view>
+      </view>
+    </view>
+    <view class="shopDesc">
+      <text class="shop-name pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .8s;">店铺详情</text>
+      <view class="shopDescDetail pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .8s;">
+        <template is="wxParse" data="{{wxParseData:article.nodes}}"/>
+      </view>
+    </view>
+  </view>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../../components/loading'
+  import api from '../../utils/commonMT.js'
+  import AboutModel from './aboutModel.js'
+  import wxParse from '../../wxParse/wxParse'
+  import commonMt from '../../mixins/commonWay.js'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '联系我们',
+      enablePullDownRefresh: true,
+      backgroundTextStyle: 'dark'
+    }
+    components = {
+      loading: loading
+    }
+
+    data = {
+      showContent: false,
+      indexData:'',
+      showVersion: false
+    }
+    mixins = [commonMt]
+    computed = {
+      
+    }
+
+    methods = {
+      seeVersion(){
+        this.showVersion = true
+        this.$apply()
+      },
+      hideVersion(){
+        this.showVersion = false
+        this.$apply()
+      }
+    }
+
+    events = {
+      
+    }
+    onLoad() {
+      this._loadData()
+    }
+    _loadData(){
+      AboutModel.getAboutData({},(res)=>{
+        wx.stopPullDownRefresh()
+        if(res.error === 0){
+          this.indexData = res.data
+          this.showContent = true
+          wxParse.wxParse('article', 'html', this.indexData.detail, this, 0)
+          this.$apply()
+        } else {
+          api.showTips(res.msg)
+        }
+      })
+    }
+    onPullDownRefresh(){
+      this._loadData()
+    }
+    onShow(){
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+  }
+  .indexBox{
+    width: 100%;
+    position: relative;
+    .version{
+      width: 200rpx;
+      height: 50rpx;
+      background-color: #48C6A9;
+      position: absolute;
+      top: 20rpx;
+      left: 30rpx;
+      z-index: 1;
+      color: #fff;
+      font-size: 28rpx;
+      text-align: center;
+      line-height: 50rpx;
+      opacity: 0;
+      transition: .4s;
+    }
+    .showVersion{
+      opacity: 1;
+    }
+    .aboutPic{
+      width: 100%;
+      height: 400rpx;
+      background-color: #48C6A9;
+    }
+    .about-title{
+      font-size: 48rpx;
+      color: #242424;
+      font-weight: 600;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 36rpx 30rpx 50rpx;
+      display: block;
+    }
+    .aboutItem{
+      width: 690rpx;
+      padding-bottom: 20rpx;
+      margin-left: 30rpx;
+      border-bottom: 1px solid #F1F5F7;
+      margin-bottom: 35rpx;
+      .aboutItem-title{
+        font-size: 28rpx;
+        color: #0B0B0B;
+        font-weight: 500;
+      }
+      .aboutItem-content{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10rpx;
+        .content-txt{
+          font-size: 25rpx;
+          color: #9C9C94;
+          line-height: 36rpx;
+        }
+        .content-right{
+          display: flex;
+          align-items: center;
+          height: 50rpx;
+          .cut{
+            width: 1px;
+            height: 35rpx;
+            background-color: #DEDEDE;
+          }
+          .locationIcon{
+            width: 35rpx;
+            height: 35rpx;
+            margin-left: 25rpx;
+          }
+        }
+      }
+    }
+    .shopDesc{
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 30rpx;
+      border-top: 20rpx solid #F1F5F7;
+      .shop-name{
+        font-size: 35rpx;
+        font-weight: 600;
+        line-height: 90rpx;
+      }
+      .shopDescDetail{
+        width: 100%;
+        image{
+          width: 100%;
+          margin-bottom: 10rpx;
+        }
+      }
+    }
+  }
+</style>

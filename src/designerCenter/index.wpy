@@ -1,0 +1,427 @@
+<template>
+  <view class="pre-initShow {{showContent?'initShow':''}}">
+    <view class="designerCenter-top">
+      <view class="designer-left">
+        <text class="designer-name">{{indexData.name}}</text>
+        <text class="designer-address ellip-1">{{indexData.address}}</text>
+        <view class="designer-desc {{moreDesc == '收起'?'openDesignDesc':''}}">
+          <text>{{indexData.summary}}</text>
+          <view wx:if="{{indexData.summary.length>40}}" class="moreDesc {{moreDesc == '收起'?'openDesc':''}}" @tap="moreDescTap">{{moreDesc}}</view>
+        </view>
+      </view>
+      <view class="designerPicBox">
+        <image src="{{indexData.avatar}}" mode="aspectFill" class="designerIcon"></image>
+        <text class="designerTag">{{indexData.job}}</text>
+      </view>
+    </view>
+    <view class="works-info">
+      <view class="info-left">
+        <view class="info-left-item">
+          <text>作品集</text>
+          <text class="left-item-number">{{indexData.all_case_num}}</text>
+        </view>
+        <view class="info-left-item">
+          <text>浏览量</text>
+          <text class="left-item-number">{{indexData.view_num}}</text>
+        </view>
+      </view>
+      <view class="bespeak" @tap="bespeak">预约</view>
+    </view>
+  </view>
+  <view class="itemTabBox {{isFixed?'isFixed':''}}" style="transform: translateY({{isFixed?(scrollTop-tabTop):0}}px)">
+    <view class="tabItem pre-initShow {{showContent?'initShow':''}} {{activeItemIndex == 0 ? 'activeItem': ''}}" @tap="itemTab(0)" style="transition: .5s .2s">作品集</view>
+    <view class="tabItem pre-initShow {{showContent?'initShow':''}} {{activeItemIndex == 1 ? 'activeItem': ''}}" @tap="itemTab(1)" style="transition: .5s .3s">施工中</view>
+    <view class="moveItem pre-initShow {{showContent?'initShow':''}} {{activeItemIndex == 1 ? 'nextItem': ''}}" style="transition: .5s;"></view>
+    <image src="{{indexData.avatar}}" mode="aspectFill" class="designerIcon2 {{isFixed?'showdesignerIcon2':''}}"></image>
+  </view>
+  <view class="worksList" wx:if="{{activeItemIndex == 0}}">
+    <repeat for="{{caseData}}" key="index" item="item" index="index">
+      <worksItem :show.sync="showContent" :item.sync="item" :index.sync="index"></worksItem>
+    </repeat>
+  </view>
+  <view class="worksiteList" wx:if="{{activeItemIndex == 1}}">
+    <repeat for="{{workSiteData}}" key="index" item="item" index="index">
+      <worksiteItem :showItem.sync="showContent" :item.sync="item" :index.sync="index" :type="2"></worksiteItem>
+    </repeat>
+  </view>
+  <Empty top="100" :load.sync="isProEmpty" emptyTips="暂无项目"></Empty>
+  <login></login>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../components/loading'
+  import api from '../utils/commonMT.js'
+  import worksItem from '../components/worksItem'
+  import worksiteItem from '../components/workSiteItem'
+  import DesignerModel from './designer.js'
+  import login from '../components/login'
+  import Empty from '../components/empty'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#000",
+      navigationBarTitleText: '设计师',
+      navigationBarTextStyle: 'white',
+      backgroundColorTop: '#000',
+      backgroundColorBottom: '#fff'
+    }
+    components = {
+      loading: loading,
+      worksItem: worksItem,
+      worksiteItem: worksiteItem,
+      login: login,
+      Empty: Empty
+    }
+
+    data = {
+      showContent: false,
+      activeItemIndex: 0,
+      moreDesc: '点击展开',
+      id: '',
+      indexData: '',
+      caseData: '',
+      workSiteData: '',
+      pageNum: [1,1],
+      isLoadall: [false,false],
+      isFixed: false,
+      isProEmpty: false,
+      scrollTop: 0
+    }
+
+    computed = {
+      // tabTop(){
+      //   if(!this.indexData){
+      //     return false
+      //   }
+      //   let len = this.indexData.summary.length
+      //   if(len<21){
+      //     return 210
+      //   }
+      //   if(len>=21 && len<42){
+      //     return 230
+      //   }
+      //   if(len>=42){
+      //     return 250
+      //   }
+      // }
+    }
+
+    methods = {
+      itemTab(index){
+        if(index == 0){
+          if(this.caseData.length == 0){
+            this.isProEmpty = true
+          } else {
+            this.isProEmpty = false
+          }
+        }
+        if(index == 1){
+          if(this.workSiteData.length == 0){
+            this.isProEmpty = true
+          } else {
+            this.isProEmpty = false
+          }
+        }
+        this.activeItemIndex = index
+        this.$apply()
+      },
+      moreDescTap(){
+        if(this.moreDesc == '收起'){
+          this.moreDesc = '点击展开'
+        } else{
+          this.moreDesc = '收起'
+        }
+        this.$apply()
+      },
+      bespeak(){
+        api.navTo('../bespeak/design')
+      }
+    }
+
+    events = {
+      
+    }
+    onLoad(e) {
+      this.id = e.id
+      this._loadData()
+    }
+    _loadData(){
+      let query1 = {
+        id: this.id,
+        page: this.pageNum[0]
+      }
+      DesignerModel.getDesignerData(query1,(res)=>{
+        console.log(res)
+        if(res.error === 0){
+          this.indexData = res.data
+          this.caseData = res.data.all_case_info
+          if(this.caseData.length === 0){
+            this.isProEmpty = true
+          }
+          this.$apply()
+          this.showContent = true
+          this.$apply()
+        } else {
+          api.showTips(res.msg)
+        }
+      })
+      let query2 = {
+        id: this.id,
+        page: this.pageNum[1]
+      }
+      DesignerModel.getWorksiteData(query2,(res)=>{
+        if(res.error === 0){
+          this.workSiteData = res.data
+          this.$apply()
+        } else {
+        }
+      })
+    }
+    onPageScroll(e){
+      // this.scrollTop = e.scrollTop
+      // if(e.scrollTop>this.tabTop && this.moreDesc == '点击展开'){
+      //   this.isFixed = true
+      //   this.$apply()
+      // } else {
+      //   this.isFixed = false
+      //   this.$apply()
+      // }
+    }
+    onReachBottom(){
+      if(this.activeItemIndex == 0 && !this.isLoadall[0]){
+        api.showTips('加载中...')
+        this.pageNum[0]++
+        let query1 = {
+          id: this.id,
+          page: this.pageNum[0]
+        }
+        DesignerModel.getDesignerData(query1,(res)=>{
+          if(res.error === 0){
+            if(res.data.all_case_info.length === 0){
+              this.isLoadall[0] = true
+              api.showTips('没有更多了哦')
+              return false
+            }
+            this.caseData = [...this.caseData, ...res.data.all_case_info]
+            this.$apply()
+          } else {
+            api.showTips(res.msg)
+          }
+        })
+      }
+      if(this.activeItemIndex == 1 && !this.isLoadall[1]){
+        api.showTips('加载中...')
+        this.pageNum[1]++
+        let query2 = {
+          id: this.id,
+          page: this.pageNum[1]
+        }
+        DesignerModel.getWorksiteData(query2,(res)=>{
+          if(res.error === 0){
+            this.workSiteData = [...this.workSiteData,...res.data]
+            this.$apply()
+          } else {
+            api.showTips(res.msg)
+            this.isLoadall[1] = true
+          }
+        })
+      }
+    }
+    onShow(){
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+    background-color: #FFFFFF;
+  }
+  .designerCenter-top{
+    background-color: #000;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 30rpx 30rpx 50rpx;
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    .designer-left{
+      display: flex;
+      flex-direction: column;
+      width: 540rpx;
+      .designer-name{
+        font-size: 40rpx;
+        font-weight: 600;
+      }
+      .designer-address{
+        font-size: 27rpx;
+        margin: 30rpx 0 12rpx;
+        width: 500rpx;
+      }
+      .designer-desc{
+        font-size: 27rpx;
+        line-height: 35rpx;
+        max-height: 100rpx;
+        overflow: hidden;
+        position: relative;
+        padding-bottom: 40rpx;
+        text{
+          height: 100%;
+        }
+        .moreDesc{
+          position: absolute;
+          bottom: -0;
+          left: 0;
+          width: 100%;
+          height: 100rpx;
+          background: linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));
+          font-size: 22rpx;
+          line-height: 30rpx;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          color: #fff;
+          font-weight: 500;
+        }
+        .openDesc{
+          background: linear-gradient(0deg,rgba(255,255,255,0),rgba(255,255,255,0));
+
+        }
+      }
+      .openDesignDesc{
+        max-height: none;
+        padding-bottom: 50rpx;
+      }
+    }
+    .designerPicBox{
+      width: 140rpx;
+      position: relative;
+      height: 140rpx;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      .designerIcon{
+        width: 130rpx;
+        height: 130rpx;
+        background-color: #BFD1CE;
+        border-radius: 100%;
+      }
+      .designerTag{
+        padding: 0 8rpx;
+        height: 28rpx;
+        background-color: #20B7B6;
+        color: #fff;
+        font-size: 17rpx;
+        border-top-right-radius: 10rpx;
+        border-bottom-left-radius: 10rpx;
+        line-height: 28rpx;
+        text-align: center;
+        position: absolute;
+        bottom: 0;
+        right: 0; 
+      }
+    }
+  }
+  .works-info{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 90rpx;
+    background-color: #000;
+    color: #fff;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 0 30rpx 40rpx;
+    .info-left{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .info-left-item{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 26rpx;
+        margin-right: 70rpx;
+        .left-item-number{
+          font-weight: 600;
+          margin-top: 10rpx;
+          font-family: 'workNumber';
+        }
+      }
+    }
+    .bespeak{
+      width: 165rpx;
+      height: 60rpx;
+      background-color: #fff;
+      border-radius: 40rpx;
+      font-size: 24rpx;
+      color: #000;
+      text-align: center;
+      line-height: 60rpx;
+    }
+  }
+  .itemTabBox{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50rpx 0 20rpx;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0 0 30rpx;
+    overflow: hidden;
+    background-color: #fff;
+    z-index: 10;
+    transition: .5s;
+    .tabItem{
+      color: #888;
+      font-size: 35rpx;
+      font-weight: 500;
+      text-align: center;
+      width: 170rpx;
+    }
+    .activeItem{
+      color: #1D1D1D;
+    }
+    .moveItem{
+      position: absolute;
+      bottom: 8rpx;
+      left: 260rpx;
+      width: 67rpx;
+      height: 3px;
+      background-color: #000;
+      transition: .3s;
+    }
+    .nextItem{
+      transform: translateX(170rpx);
+    }
+    .designerIcon2{
+      width: 55rpx;
+      height: 55rpx;
+      border-radius: 100%;
+      position: absolute;
+      right: 30rpx;
+      top: 50rpx;
+      opacity: 0;
+      transform: translateX(100rpx);
+      transition: .7s;
+    }
+    .showdesignerIcon2{
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .isFixed{
+    background-color: #C9DBDB;
+  }
+  .worksList{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .worksiteList{
+    width: 100%;
+    box-sizing: border-box;
+  }
+</style>

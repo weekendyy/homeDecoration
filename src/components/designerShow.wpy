@@ -1,0 +1,191 @@
+<template>
+  <view class="designerShowBBox">
+    <form report-submit="true" bindsubmit="toBannerUrl">
+      <swiper indicator-dots="true" style="height: 730rpx;"
+          autoplay="" interval="5000" duration="500" circular="true">
+        <block wx:for="{{worksDAta}}" wx:key="{{index}}">
+          <swiper-item>
+            <view class="designerShowBox">
+              <view class="designerShow-head">
+                <image @tap.stop="toDesigner({{item.design_designer.id}})" src="{{item.design_designer.avatar}}" mode="aspectFill" class="designerIcon"></image>
+                <view class="designer-Txtinfo">
+                  <view class="designerName">
+                    <text class="ellip-1">{{item.design_designer.name}}</text>
+                    <view class="designTag">{{item.design_designer.job}}</view>
+                  </view>
+                  <text class="designShow-time">{{item.create_at}}发布</text>
+                </view>
+                <view class="bespeakBtn" @tap.stop="tobespeak">预约</view>
+              </view>
+              <view class="designShow-bottom" @tap="toWorksDetail({{item.id}})">
+                <image src="{{item.thumb_img}}" class="main-pic" mode="aspectFill"></image>
+                <text class="designShow-title ellip-2">{{item.case_name}}</text>
+                <text class="dsignShow-tag">{{item.desc}}</text>
+              </view>
+              <image src="./images/jingxuan.png" mode="widthFix" class="jinxuan" />
+            </view>
+          </swiper-item>
+        </block>
+        <swiper-item wx:if="{{worksDAta.length === 0}}">
+          <view class="noneCase">请前往后台添加方案</view>
+        </swiper-item>
+      </swiper>
+    </form>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import api from '../utils/commonMT.js'
+  export default class Banner extends wepy.component {
+    props = {
+      isShow: Boolean,
+      worksDAta: Object
+    }
+    computed = {
+    }
+    data = {
+    }
+    components = {
+      
+    }
+    methods = {
+      toDesigner(id){
+        api.navTo('../../designerCenter/index',{id:id})
+      },
+      tobespeak(){
+        api.navTo('../../bespeak/design')
+      },
+      toWorksDetail(id){
+        api.navTo('../../designerCenter/worksDetail',{id: id})
+      }
+    }
+    onLoad(){
+    }
+  }
+</script>
+<style type="less">
+  .designerShowBBox{
+    .noneCase{
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 28rpx;
+    }
+    .wx-swiper-dots.wx-swiper-dots-horizontal{
+        margin-bottom: 2rpx;
+      }
+      .wx-swiper-dot{
+          width:35rpx;
+          display: inline-flex;
+          height: 7rpx;
+          justify-content:space-between;
+          border-radius: 5rpx
+      }
+      .wx-swiper-dot::before{
+          content: '';
+          flex-grow: 1; 
+          background: rgba(255,255,255,0.8);
+      }
+      .wx-swiper-dot-active::before{
+          background:#48C6A9;
+      }
+  }
+  .designerShowBox{
+    width: 100%;
+    padding: 30rpx 0 0;
+    position: relative;
+    .jinxuan{
+      width: 95rpx;
+      height: 95rpx;
+      position: absolute;
+      bottom: 225rpx;
+      right: 33rpx;
+    }
+    .designerShow-head{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      margin-bottom: 30rpx;
+      .designerIcon{
+        width: 75rpx;
+        height: 75rpx;
+        background-color: #BFD1CE;
+        border-radius: 100%;
+      }
+      .designer-Txtinfo{
+        display: flex;
+        flex-direction: column;
+        margin-left: 30rpx;
+        flex: 1;
+        .designerName{
+          display: flex;
+          font-size: 30rpx;
+          color: #000;
+          font-weight: 600;
+          text{
+            max-width: 300rpx;
+          }
+          .designTag{
+            padding: 0 8rpx;
+            height: 27rpx;
+            background-color: #20B7B6;
+            border-bottom-left-radius: 10rpx;
+            border-top-right-radius: 10rpx;
+            color: #fff;
+            font-size: 19rpx;
+            line-height: 27rpx;
+            text-align: center;
+            margin-left: 20rpx;
+          }
+        }
+        .designShow-time{
+          color: #BABABA;
+          font-size: 22rpx;
+          margin-top: 15rpx;
+        }
+      }
+      .bespeakBtn{
+        width: 150rpx;
+        height: 60rpx;
+        border-radius: 40rpx;
+        background-color: #F4FCFC;
+        text-align: center;
+        line-height: 60rpx;
+        font-size: 24rpx;
+        color: #24rpx;
+        color: #2AB8B5;
+        font-weight: 500;
+      }
+    }
+    .designShow-bottom{
+      border-radius: 10rpx;
+      border:1px solid #EEEEEE;
+      padding-bottom: 50rpx;
+      .main-pic{
+        width: 100%;
+        height: 350rpx;
+        border-top-left-radius: 10rpx;
+        border-top-right-radius: 10rpx;
+        background-color: #BFD1CE;
+      }
+      .designShow-title{
+        font-size: 39rpx;
+        font-weight: 600;
+        width: 635rpx;
+        margin-left: 30rpx;
+        line-height: 49rpx;
+        margin-top: 40rpx;
+        margin-bottom: 15rpx;
+      }
+      .dsignShow-tag{
+        font-size: 28rpx;
+        color: #8F8F8F;
+        width: 635rpx;
+        margin-left: 30rpx;
+      }
+    }
+  }
+</style>

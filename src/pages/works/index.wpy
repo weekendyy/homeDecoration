@@ -1,0 +1,115 @@
+<template>
+  <view class="indexBox">
+    <repeat for="{{indexData}}" key="{{index}}" index="index" item="item">
+      <worksItem :show.sync="showContent" :item.sync="item" :index.sync="index"></worksItem>
+    </repeat>
+    <view style="height: 300rpx;" wx:if="{{indexData.length === 0}}"></view>
+    <Empty :load.sync="isProEmpty" emptyTips="暂无项目"></Empty>
+  </view>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../../components/loading'
+  import api from '../../utils/commonMT.js'
+  import worksItem from '../../components/worksItem'
+  import worksModel from './worksModel.js'
+  import Empty from '../../components/empty'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '家装',
+      enablePullDownRefresh: true,
+      backgroundTextStyle: 'dark'
+    }
+    components = {
+      loading: loading,
+      worksItem: worksItem,
+      Empty: Empty
+    }
+
+    data = {
+      showContent: false,
+      pageNum: 1,
+      indexData: '',
+      isLoadall: false,
+      isProEmpty: false
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      
+    }
+
+    events = {
+      
+    }
+    onLoad() {
+      this._loadData(1)
+    }
+    _loadData(pageNum){
+      if(pageNum != 1){
+        wx.showLoading({
+          title: '加载中...',
+          icon: "none",
+        })
+      }
+      let query = {
+        pageNum: pageNum
+      } 
+      worksModel.getWorksData(query,(res)=>{
+        wx.stopPullDownRefresh()
+        wx.hideLoading()
+        if(res.error === 0){
+          if(pageNum === 1){
+            this.indexData = res.data
+            if(this.indexData.length === 0){
+              this.isProEmpty = true
+            }
+            setTimeout(()=>{
+              this.showContent = true
+              this.$apply()
+            },500)
+          } else {
+            this.indexData = [...this.indexData,...res.data]
+          }
+          this.$apply()
+        } else {
+          api.showTips(res.msg)
+          this.isLoadall = true
+        }
+      })
+    }
+    onPullDownRefresh(){
+      this._loadData(1)
+      this.pageNum = 1
+      this.isLoadall = false
+    }
+    onReachBottom(){
+      if(!this.isLoadall){
+        this.pageNum++
+        let pageNum = this.pageNum
+        this._loadData(pageNum)
+      }
+    }
+    onShow(){
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+    background-color: #F3F7F9;
+  }
+  .indexBox{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20rpx 0;
+  }
+</style>

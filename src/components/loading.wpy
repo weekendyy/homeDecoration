@@ -1,0 +1,313 @@
+<template>
+  <view class="loadingBoxNew" wx:if="{{!load}}">
+    <!-- <view class="loader">
+      <view class="loader__bar"></view>
+      <view class="loader__bar"></view>
+      <view class="loader__bar"></view>
+      <view class="loader__bar"></view>
+      <view class="loader__bar"></view>
+      <view class="loader__ball"></view>
+    </view> -->
+    <!-- <image src="../images/loading.gif" mode="widthFix" class="loadingIcon"></image> -->
+   <!-- <view class="leftBall"></view> -->
+   <view class="rightBall1"></view>
+   <view class="rightBall2"></view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class loading extends wepy.component {
+    props = {
+      load: Boolean
+    }
+    data = {
+      
+    }
+    computed = {
+      
+    }
+    components = {
+      
+    }
+    methods = {
+      
+    }
+    onLoad(){
+      wx.showShareMenu()
+    }
+  }
+</script>
+<style type="scss">
+  .leftBall{
+    width: 25rpx;
+    height: 25rpx;
+    border-radius: 100%;
+    background-color: #0CB7FC;
+    position: absolute;
+    top: 500rpx;
+    left: 362rpx;
+    animation: leftBallmove 1s linear alternate infinite;
+  }
+  @keyframes leftBallmove{
+    0%{
+      transform: translateX(20rpx) scale(.8);
+      opacity: .5;
+    }
+    /*25%{
+      transform: translateX(10rpx) scale(1.3);
+      opacity: 1;
+    }*/
+    50%{
+      transform: translateX(0rpx) scale(1.4);
+      background-color: #48C6A9;
+      opacity: 1;
+    }
+   /* 75%{
+      transform: translateX(-10rpx) scale(0.7);
+      opacity: 1;
+    }*/
+    100%{
+      transform: translateX(-20rpx) scale(.8);
+      opacity: .5;
+    }
+  }
+  .rightBall1{
+    width: 25rpx;
+    height: 25rpx;
+    border-radius: 100%;
+    background-color: #0FB5FD;
+    position: absolute;
+    top: 500rpx;
+    left: 362rpx;
+    animation: rightBallmove 1s linear infinite;
+  }
+  @keyframes rightBallmove{
+    0%{
+      transform: translateX(-20rpx) scale(.8);
+      opacity: .2;
+    }
+    50%{
+      transform: translateX(0rpx) scale(1.4);
+      opacity: 1;
+    }
+    100%{
+      transform: translateX(20rpx) scale(.8);
+      opacity: .2;
+    }
+  }
+  .rightBall2{
+    width: 25rpx;
+    height: 25rpx;
+    border-radius: 100%;
+    background-color: #F34A78;
+    position: absolute;
+    top: 500rpx;
+    left: 362rpx;
+    animation: rightBallmoveT 1s linear infinite;
+  }
+  @keyframes rightBallmoveT{
+    0%{
+      transform: translateX(20rpx) scale(.8);
+      opacity: .2;
+    }
+    50%{
+      transform: translateX(0rpx) scale(.4);
+      opacity: 1;
+    }
+    100%{
+      transform: translateX(-20rpx) scale(.8);
+      opacity: .2;
+    }
+  }
+  $bar-color: #48C6A9;
+  $ball-color: #48C6A9;
+  $bg-color: #EA4961;
+  .loadingIcon{
+    width: 120rpx;
+    height: 120rpx;
+  }
+  .loadingBoxNew {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    z-index: 999;
+  }
+
+  .loader {
+    position: relative;
+    width: 150rpx;
+    height: 200rpx;
+    transform: scale(0.6);
+    &__bar {
+      background: $bar-color;
+      position: absolute;
+      bottom: 0;
+      width: 20rpx;
+      height: 50%;
+      transform-origin: center bottom;
+      
+      @for $i from 1 through 5 { 
+         &:nth-child(#{$i}) {
+           left: ($i - 1) * 15px;
+           transform: scale(1,$i*.2);
+           animation: barUp#{$i} 4s infinite;
+          }
+      }
+      
+    }
+    
+    &__ball {
+      position: absolute;
+      bottom: 20rpx;
+      left: 0;
+      width: 20rpx;
+      height: 20rpx;
+      background: $ball-color;
+      border-radius: 50%;
+      animation: ball 4s infinite;
+    }
+  }
+
+  @keyframes ball {
+    0% {
+      transform: translate(0, 0);
+    }
+    5% {
+      transform: translate(8px, -14px);
+    }
+    10% {
+      transform: translate(15px, -10px)
+    }
+    17% {
+      transform: translate(23px, -24px)
+    }
+    20% {
+      transform: translate(30px, -20px)
+    }
+    27% {
+      transform: translate(38px, -34px)
+    }
+    30% {
+      transform: translate(45px, -30px)
+    }
+    37% {
+      transform: translate(53px, -44px)
+    }
+    40% {
+      transform: translate(60px, -40px)
+    }
+    50% {
+      transform: translate(60px, 0)
+    }
+    57% {
+      transform: translate(53px, -14px)
+    }
+    60% {
+      transform: translate(45px, -10px)
+    }
+    67% {
+      transform: translate(37px, -24px)
+    }
+    70% {
+      transform: translate(30px, -20px)
+    }
+    77% {
+      transform: translate(22px, -34px)
+    }
+    80% {
+      transform: translate(15px, -30px)
+    }
+    87% {
+      transform: translate(7px, -44px)
+    }
+    90% {
+      transform: translate(0, -40px)
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  @keyframes barUp1 { 
+    0% {
+      transform: scale(1, .2);
+    }
+    40%{
+      transform: scale(1, .2);
+    }
+    50% {
+      transform: scale(1, 1);
+    }
+    90% {
+      transform: scale(1,1);
+    }
+    100% {
+      transform: scale(1,.2);
+    }
+  }
+  @keyframes barUp2 { 
+    0% {
+      transform: scale(1, .4);
+    }
+    40% {
+      transform: scale(1, .4);
+    }
+    50% {
+      transform: scale(1, .8);
+    }
+    90% {
+      transform: scale(1, .8);
+    }
+    100% {
+      transform: scale(1, .4);
+    }
+  }
+  @keyframes barUp3 { 
+    0% {
+      transform: scale(1, .6);
+    }
+    100% {
+      transform: scale(1, .6);
+    }
+  }
+  @keyframes barUp4 { 
+    0% {
+      transform: scale(1, .8);
+    }
+    40% {
+      transform: scale(1, .8);
+    }
+    50% {
+      transform: scale(1, .4);
+    }
+    90% {
+      transform: scale(1, .4);
+    }
+    100% {
+      transform: scale(1, .8);
+    }
+  }
+  @keyframes barUp5 { 
+    0% {
+      transform: scale(1, 1);
+    }
+    40% {
+      transform: scale(1, 1);
+    }
+    50% {
+      transform: scale(1, .2);
+    }
+    90% {
+      transform: scale(1, .2);
+    }
+    100% {
+      transform: scale(1, 1);
+    }
+  }
+</style>

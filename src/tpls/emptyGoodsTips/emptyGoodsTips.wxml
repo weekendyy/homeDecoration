@@ -1,0 +1,6 @@
+<template name="emptyGoodsTips">
+	<view class="nonegoods">
+	  <image src="/images/nonegoods.png" mode="widthFix" class="nonegoodspic"></image>
+	  <text class="nonetxt">{{tipsTxt?tipsTxt:'暂无商品'}}</text>
+	</view>
+</template>

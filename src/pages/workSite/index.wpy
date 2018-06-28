@@ -1,0 +1,204 @@
+<template>
+  <view class="indexBox">
+    <classify :show.sync="showContent" :classifyData.sync="classifyData"></classify>
+    <view style="height: 90rpx;"></view>
+    <repeat for="{{workSiteData}}" key="index" index="index" item="item">
+      <workSiteItem :showItem.sync="showworkItem" :item.sync="item" :index.sync="index"></workSiteItem>
+    </repeat>
+    <view style="height: 200rpx;" wx:if="{{isProEmpty}}"></view>
+    <Empty :load.sync="isProEmpty" emptyTips="暂无项目"></Empty>
+    <view style="height: 1px"></view>
+  </view>
+  <login></login>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../../components/loading'
+  import commonMixin from '../../mixins/commonWay'
+  import api from '../../utils/commonMT.js'
+  import classify from '../../components/classify'
+  import workSiteItem from '../../components/workSiteItem'
+  import WorksiteModel from './workSiteModel.js'
+  import Empty from '../../components/empty'
+  import login from '../../components/login'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '工地',
+      enablePullDownRefresh: true,
+      backgroundTextStyle: 'dark'
+    }
+    components = {
+      loading: loading,
+      classify: classify,
+      workSiteItem: workSiteItem,
+      Empty:Empty,
+      login: login
+    }
+
+    data = {
+      showContent: false,
+      showworkItem: false,
+      workSiteData: [],
+      classifyData: [],
+      pageNum: 1,
+      isLoadall: false
+    }
+
+    mixins = [commonMixin]
+
+    computed = {
+      isProEmpty(){
+        if(this.workSiteData.length === 0){
+          return true
+        } else {
+          return false
+        }
+      }
+    }
+
+    methods = {
+      
+    }
+
+    events = {
+      hideItem(){
+        this.showworkItem = false
+        this.$apply()
+      },
+      upDateData(data){
+        this.workSiteData = data
+        this.$apply()
+        this.showworkItem = true
+        this.$apply()
+        // setTimeout(()=>{
+        // },100)
+      }
+    }
+    onLoad() {
+      this._loadData()
+    }
+    _loadData(){
+      let worksiteId = wx.getStorageSync('worksiteId')
+      if(worksiteId && this.showContent){
+        wx.showLoading({
+          title: '加载中...'
+        })
+      }
+      WorksiteModel.getClassifyData({},(res)=>{
+        wx.stopPullDownRefresh()
+        if(res.error === 0){
+          this.classifyData = ''
+          this.$apply()
+          this.classifyData = res.data
+          for(let i=0,len=this.classifyData.length; i<len; i++){
+            if(this.classifyData[i]._child){
+              this.classifyData[i]._child.unshift({
+                // cat_name: this.classifyData[i].cat_name
+                cat_name: '不限' + '(' + this.classifyData[i].cat_name + ')'
+              })
+            } else {
+              this.classifyData[i]._child = []
+              this.classifyData[i]._child.unshift({
+                // cat_name: this.classifyData[i].cat_name
+                cat_name: '不限' + '(' + this.classifyData[i].cat_name + ')'
+              })
+            }
+            if(this.classifyData[i].rank == 2){
+              for(let k=1,len=this.classifyData[i]._child.length;k<len;k++){
+                if(this.classifyData[i]._child[k]._child){
+                  this.classifyData[i]._child[k]._child.unshift({
+                    cat_name:'不限',
+                    id: this.classifyData[i]._child[k].id
+                  })
+                } else {
+                  this.classifyData[i]._child[k]._child = []
+                  console.log(this.classifyData[i]._child[k]._child)
+                  this.classifyData[i]._child[k]._child.push({
+                    cat_name:'不限',
+                    id: this.classifyData[i]._child[k].id
+                  })
+                }
+              }
+            }
+            this.classifyData[i].activeTemp = 0
+            this.classifyData[i].active = 0
+          }
+          if(worksiteId){
+            for(let i=0,len=this.classifyData.length;i<len;i++){
+              for(let k=0,len2=this.classifyData[i]._child.length;k<len2;k++){
+                if(this.classifyData[i]._child[k].id == worksiteId.id){
+                  this.classifyData[i].cat_name = worksiteId.name
+                }
+              }
+            }
+          }
+          this.$apply()
+        } else {
+          api.showTips(res.mag)
+        }
+      })
+      let query = {
+        pageNum: this.pageNum
+      }
+      if(worksiteId){
+        query.searchData = worksiteId.id
+      }
+      wx.removeStorageSync('worksiteId')
+      WorksiteModel.getHomeData(query,(res)=>{
+        wx.stopPullDownRefresh()
+        wx.hideLoading()
+        if(res.error === 1){
+          api.showTips(res.mag)
+        } else {
+          this.showworkItem = false
+          this.workSiteData = res
+          this.$apply()
+          setTimeout(()=>{
+            this.showContent = true
+            this.showworkItem = true
+            this.$apply()
+          },800)
+        }
+      })
+    }
+    onPullDownRefresh(){
+      this.isLoadall = false
+      this.pageNum = 1
+      this._loadData()
+    }
+    onShow(){
+      let worksiteId = wx.getStorageSync('worksiteId')
+      if(worksiteId){
+        this._loadData()
+      }
+    }
+    onReachBottom(){
+      if(!this.isLoadall){
+        this.pageNum++
+        wx.showLoading({
+          title: '加载中...'
+        })
+        WorksiteModel.getHomeData({pageNum:this.pageNum},(res)=>{
+          wx.hideLoading()
+          if(res.error === 1){
+            api.showTips(res.msg)
+            this.isLoadall = true
+          } else {
+            this.workSiteData = [...this.workSiteData,...res]
+            this.$apply()
+          }
+        })
+      }
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+    background-color: #F8F8F8;
+  }
+  
+</style>

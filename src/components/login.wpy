@@ -1,0 +1,56 @@
+<template>
+  <button wx:if="{{showLoginBtn}}" class="getUserInfoBtn" open-type="getUserInfo" bindgetuserinfo="getUserInfo"></button>
+</template>
+<script>
+  import wepy from 'wepy'
+  import api from '../utils/commonMT.js'
+  export default class login extends wepy.component {
+    props = {
+    }
+    data = {
+      showLoginBtn: true
+    }
+    computed = {
+      
+    }
+    components = {
+      
+    }
+    methods = {
+      getUserInfo(res){
+        wx.showLoading({
+          title: '登录中...'
+        })
+        api.getUser(res,()=>{
+          wx.hideLoading()
+          api.showTips("登录成功")
+          this.showLoginBtn = false
+          this.$apply()
+        })
+      }
+    }
+    onLoad(){
+      let info = wx.getStorageSync('userInfo')
+      if(info){
+        this.showLoginBtn = false
+        this.$apply()
+      }
+    }
+  }
+</script>
+<style type="less">
+  .getUserInfoBtn{
+    width: 750rpx;
+    height: 100%;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+    &::after{
+      content:none;
+    }
+  }
+</style>

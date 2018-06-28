@@ -1,0 +1,147 @@
+<template>
+  <form report-submit="true" bindsubmit="toBannerUrl">
+    <view class="bannerBox pre-initShow {{isShow?'initShow':''}}" style="transition: .5s .2s;">
+      <swiper wx:if="{{bannerImgs.length != 0}}" indicator-dots="true" class="swiperBox" bindchange="bannerChange"
+        previous-margin="30rpx" next-margin="30rpx" current="{{bannerIndex}}"
+        autoplay="" interval="5000" duration="500" circular="true">
+        <block wx:for="{{bannerImgs}}" wx:key="{{index}}">
+          <swiper-item style="display:flex;align-items:center;justify-content:center;">
+            <view class="picBox {{isShow?'showBannerPic':''}}" style="transition: .4s {{bannerIndex == index ? '.4' : '0.5'}}s;">
+              <image style="transform: scale({{bannerIndex == index ? '1' : '0.9'}})" src="{{item}}" mode="aspectFill" class="bannerImg" />
+              <button class="formIdBtn" form-type="submit" data-url="{{item.banner_path}}"></button>
+            </view>
+          </swiper-item>
+        </block>
+      </swiper>
+      <view class="see_num {{isShow?'showSee_num':''}}">
+        <image src="../pages/home/images/seenum.png" mode="widthFix" class="seeNumIcon {{isShow?'showSeeIcon':''}}"></image>
+        <text>关注: {{seeNum}}</text>
+      </view>
+    </view>
+  </form>
+</template>
+<script>
+  import wepy from 'wepy'
+  import api from '../utils/commonMT.js'
+  export default class Banner extends wepy.component {
+    props = {
+      bannerImgs: Array,
+      isShow: Boolean,
+      seeNum: String
+    }
+    computed = {
+    }
+    data = {
+      bannerType: 1,
+      bannerIndex: 0,
+    }
+    components = {
+      
+    }
+    methods = {
+      bannerChange(e){
+        this.bannerIndex = e.detail.current
+        this.$apply()
+      },
+      toBannerUrl(e){
+        let url = e.detail.target.dataset.url
+        api.navTo(url)
+      }
+    }
+    onLoad(){
+      // wx.getSystemInfo({
+      //   success: (res)=> {
+      //     let isUpdate = IndexModel.compareVersion(res.SDKVersion, '1.9.0')
+      //     if(isUpdate == -1){
+      //       this.bannerType = 2
+      //       this.$apply()
+      //     }
+      //   }
+      // })
+    }
+  }
+</script>
+<style type="less">
+  .bannerBox{
+    width: 100%;
+    background-color: #fff;
+    position: relative;
+    .swiperBox{
+      width: 100%;
+      height: 390rpx;
+      swiper-item{
+      }
+      .picBox{
+        width: 100%;
+        height: 100%;
+        border-radius: 10rpx;
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      .bannerImg{
+        width: 100%;
+        box-shadow: 0 0 5rpx rgba(0,0,0,.4);
+        height: 100%;
+        border-radius: 10rpx;
+        transition: .5s;
+      }
+      .showBannerPic{
+        opacity: 1;
+        transform: scale(1);
+      }
+      .wx-swiper-dots.wx-swiper-dots-horizontal{
+           margin-bottom: 2rpx;
+      }
+      .wx-swiper-dot{
+          width:35rpx;
+          display: inline-flex;
+          height: 7rpx;
+          justify-content:space-between;
+          border-radius: 5rpx
+      }
+      .wx-swiper-dot::before{
+          content: '';
+          flex-grow: 1; 
+          background: rgba(255,255,255,0.8);
+      }
+      .wx-swiper-dot-active::before{
+          background:#48C6A9;
+      }
+    }
+    .see_num{
+      padding: 0 15rpx;
+      height: 40rpx;
+      border-radius: 20rpx;
+      position: absolute;
+      top: 342rpx;
+      right: 40rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to right, #48C6A9, #46D1B2);
+      opacity: 0;
+      transition: .6s .4s;
+      transform: translateY(-20rpx);
+      z-index: 5;
+      box-shadow: 0 0 20rpx rgba(3,57,46,.4);
+      .seeNumIcon{
+        width: 25rpx;
+        height: 25rpx;
+        margin-right: 10rpx;
+        transition: .5s 1s;
+        transform: rotateX(90deg);
+      }
+      .showSeeIcon{
+        transform: rotateX(0);
+      }
+      text{
+        font-size: 21rpx;
+        color: #fff;
+      }
+    }
+    .showSee_num{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

@@ -1,0 +1,62 @@
+<template>
+  <view @tap="toworkDetail({{item.id}})" class="worksItem-component pre-initShow {{show?'initShow':''}}" style="transition: .5s {{index*0.2+0.1}}s">
+    <image src="{{item.thumb_img}}" mode="aspectFill" class="worksPic"></image>
+    <view class="worksItem-title ellip-1">{{item.case_name}}</view>
+    <text class="worksItem-tags ellip-1">{{item.desc}}</text>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import api from '../utils/commonMT.js'
+  export default class worksItem extends wepy.component {
+    props = {
+      show: Boolean
+    }
+    data = {
+    }
+    computed = {
+      
+    }
+    components = {
+      
+    }
+    methods = {
+      toworkDetail(id){
+        api.navTo('/designerCenter/worksDetail',{id: id})
+      }
+    }
+    onLoad(){
+      
+    }
+  }
+</script>
+<style type="less">
+  .worksItem-component{
+    width: 690rpx;
+    height: 460rpx;
+    background-color: #fff;
+    border-radius: 10rpx;
+    overflow: hidden;
+    margin-bottom: 20rpx;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 0 18px rgba(0,0,0,.1);
+    .worksPic{
+      width: 100%;
+      height: 346rpx;
+      background-color: #BFD1CE;
+    }
+    .worksItem-title{
+      font-size: 31rpx;
+      color: #0E0E0E;
+      width: 650rpx;
+      margin-left: 20rpx;
+      margin-top: 13rpx;
+    }
+    .worksItem-tags{
+      font-size: 25rpx;
+      color: #8C8C8C;
+      width: 650rpx;
+      margin-left: 20rpx;
+    }
+  }
+</style>

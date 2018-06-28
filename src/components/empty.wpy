@@ -1,0 +1,48 @@
+<template>
+  <view class="EmptyBox" wx:if="{{load}}" style="margin-top: {{top?top:0}}rpx">
+    <image src="/images/none.png" mode="widthFix" class="emptyIcon"></image>
+    <text class="emptyTips">{{emptyTips?emptyTips:'暂无商品'}}</text>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Empty extends wepy.component {
+    props = {
+      load: Boolean,
+      emptyTips: String,
+      top: String
+    }
+    data = {
+      
+    }
+    computed = {
+      
+    }
+    components = {
+      
+    }
+    methods = {
+      
+    }
+    onLoad(){
+    }
+  }
+</script>
+<style type="scss">
+  .EmptyBox{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 200rpx;
+    .emptyIcon{
+      width: 140rpx;
+      height: 140rpx;
+    }
+    .emptyTips{
+      color: #48C6A9;
+      font-size: 28rpx;
+      margin-top: 40rpx;
+    }
+  }
+</style>

@@ -1,0 +1,172 @@
+<style lang="less">
+  page{
+    height: 100%;
+  }
+  text{
+    line-height:1;
+    font-family: 'PingFang SC';
+  }
+  image{
+    vertical-align: top;
+  }
+  .pre-initShow{
+    opacity: 0;
+    transform: translateX(50rpx);
+  }
+  .initShow{
+    opacity: 1;
+    transform: translateX(0);
+    transition: .5s;
+  }
+  @font-face {
+    font-family: 'workNumber';
+    src: url('http://p55e536k6.bkt.clouddn.com/NFHT.TTF') format('truetype'),
+         url('http://p55e536k6.bkt.clouddn.com/NFHT.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  .ellip-2{
+    overflow:hidden;
+    text-overflow: ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    white-space: normal;
+  }
+  .ellip-3{
+    overflow:hidden;
+    text-overflow: ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    white-space: normal;
+  }
+  .ellip-1{
+    overflow:hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .formIdBtn{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    &::after{
+      content:none;
+    }
+  }
+</style>
+
+<script>
+import wepy from 'wepy'
+import { setStore } from 'wepy-redux'
+import configStore from './store'
+import TokenModel from './utils/token'
+const store = configStore()
+setStore(store)
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/home/index',
+      'pages/works/index',
+      'pages/about/index',
+      'pages/workSite/index'
+    ],
+    subPackages: [
+      {
+        "root": "designerCenter",  //设计师个人中心
+        "pages": [
+          "index",
+          "worksDetail",
+          "worksiteDetail"
+        ] 
+      },
+      {
+        "root": "bespeak",  //设计师个人中心
+        "pages": [
+          "measure",
+          "design",
+          "quote"
+        ] 
+      }
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: '',
+      navigationBarTextStyle: 'black'
+    },
+    'tabBar': {
+      'borderStyle': 'black',
+      'list': [
+        {
+          'pagePath': 'pages/home/index',
+          'iconPath': './images/tabBar/home.png',
+          'selectedIconPath': './images/tabBar/home-active.png',
+          'text': '首页'
+        },
+        {
+          'pagePath': 'pages/workSite/index',
+          'iconPath': './images/tabBar/worksite.png',
+          'selectedIconPath': './images/tabBar/worksite-active.png',
+          'text': '工地'
+        },
+        {
+          'pagePath': 'pages/works/index',
+          'iconPath': './images/tabBar/works.png',
+          'selectedIconPath': './images/tabBar/works-active.png',
+          'text': '图库'
+        },
+        {
+          'pagePath': 'pages/about/index',
+          'iconPath': './images/tabBar/about.png',
+          'selectedIconPath': './images/tabBar/about-active.png',
+          'text': '关于'
+        }
+      ],
+      'color': '#B7B7B7',
+      'selectedColor': '#323332',
+      'backgroundColor': '#ffffff'
+    }
+  }
+
+  globalData = {
+    userInfo: null,
+    phoneWidth:'',
+    phoneHeight:'',
+    pxRadio:''
+  }
+
+  constructor () {
+    super()
+  }
+
+  onLaunch() {
+    TokenModel.verify()
+    const res = wx.getSystemInfoSync()
+    this.globalData.phoneWidth = res.windowWidth
+    this.globalData.phoneHeight = res.windowHeight
+    this.globalData.pxRadio = this.globalData.phoneWidth/750
+    // 版本提示更新
+    const updateManager = wx.getUpdateManager()
+    updateManager.onUpdateReady(function () {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本已经准备好，是否重启应用？',
+        success: function (res) {
+          if (res.confirm) {
+            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+            updateManager.applyUpdate()
+          }
+        }
+      })
+    })
+  }
+
+}
+</script>

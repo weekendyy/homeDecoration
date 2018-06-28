@@ -1,0 +1,258 @@
+<template>
+  <import src="../wxParse/wxParse.wxml"/>
+  <view class="indexBox">
+    <image src="{{indexData.thumb_img}}" mode="aspectFill" class="mainPic pre-initShow {{showContent?'initShow':''}}"></image>
+    <view class="worksInfo pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .2s;">
+      <text class="works-info ellip-1">{{indexData.case_name}}</text>
+      <text class="works-tags ellip-1">{{indexData.desc}}</text>
+    </view>
+    <view class="designerInfo pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .3s;">
+      <view class="info-left">
+        <image class="designerPic {{showContent?'showdesignerPic':''}}" mode="aspectFill" src="{{indexData.design_designer.avatar}}" @tap="toDesigner"></image>
+        <view class="designerInfo-txt">
+          <text class="designer-name">{{indexData.design_designer.name}}</text>
+          <text class="designer-desc">{{indexData.design_designer.job}}</text>
+        </view>
+      </view>
+      <button class="designInfo-right" open-type="share">
+        <image src="./images/share.png" mode="widthFix" class="shareIcon"></image>
+        <text class="shareTxt">分享</text>
+      </button>
+    </view>
+    <text class="worksDesc pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .5s;">{{indexData.case_name}}</text>
+    <view class="cut pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .6s;"></view>
+    <view class="worksDetail {{showContent?'showworksDetail':''}}" style="transition: .5s .3s;">
+      <template is="wxParse" data="{{wxParseData:article.nodes}}"/>
+    </view>
+    <view style="height: 170rpx;"></view>
+    <view class="desginBtn {{showContent?'showdesginBtn':''}}" @tap="bespeak">
+      <image src="./images/design.png" mode="widthFix" class="designIcon"></image>
+      <text class="designTxt">请他帮我设计</text>
+    </view>
+  </view>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../components/loading'
+  import api from '../utils/commonMT.js'
+  import wxParse from '../wxParse/wxParse'
+  import DesignerModel from './designer.js'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '作品详情',
+      navigationBarTextStyle: 'black',
+      backgroundColorTop: '#fff',
+      backgroundColorBottom: '#fff'
+    }
+    components = {
+      loading: loading
+    }
+
+    data = {
+      showContent: false,
+      id: '',
+      indexData: ''
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      bespeak(){
+        api.navTo('../bespeak/measure')
+      },
+      toDesigner(){
+        api.navTo('../designerCenter/index',{id:this.indexData.design_designer.id})
+      }
+    }
+
+    events = {
+      
+    }
+    onLoad(e) {
+      this.id = e.id
+      this._loadData()
+    }
+    _loadData(){
+      let query = {
+        id: this.id
+      } 
+      DesignerModel.getWorksDetail(query,(res)=>{
+        if(res.error === 0){
+          this.indexData = res.data
+          this.showContent = true
+          wxParse.wxParse('article', 'html', this.indexData.details, this, 0)
+          this.$apply()
+        } else {
+          api.showTips(res.msg)
+        }
+      })
+    }
+    onPullDownRefresh(){
+      this._loadData()
+    }
+    onShow(){
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+    background-color: #FFFFFF;
+  }
+  .indexBox{
+    width: 100%;
+    .mainPic{
+      width: 100%;
+      height: 375rpx;
+      background-color: #BFD1CE;
+    }
+    .worksInfo{
+      width: 470rpx;
+      height: 184rpx;
+      background: rgba(255,255,255,.7);
+      position: absolute;
+      left: 140rpx;
+      top: 100rpx;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      .works-info{
+        font-size: 35rpx;
+        width: 400rpx;
+        text-align: center;
+      }
+      .works-tags{
+        font-size: 25rpx;
+        margin-top: 40rpx;
+        text-align: center;
+        width: 400rpx;
+      }
+    }
+    .designerInfo{
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 30rpx;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 30rpx 0;
+      .info-left{
+        display: flex;
+        align-items: center;
+        .designerPic{
+          width: 90rpx;
+          height: 90rpx;
+          background-color: #BFD1CE;
+          border-radius: 100%;
+          margin-right: 30rpx;
+          opacity: 0;
+          transform: rotateZ(120deg) scale(0.6);
+          transition: .6s .6s;
+        }
+        .showdesignerPic{
+          opacity: 1;
+          transform: rotateZ(0) scale(1);
+        }
+        .designerInfo-txt{
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          .designer-name{
+            font-size: 34rpx;
+            color: #161716;
+          }
+          .designer-desc{
+            font-size: 26rpx;
+            color: #BABABA;
+            margin-top: 8rpx;
+          }
+        }
+      }
+      .designInfo-right{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+        &::after{
+          content: none;
+        }
+        .shareIcon{
+          width: 30rpx;
+          height: 30rpx;
+        }
+        .shareTxt{
+          font-size: 24rpx;
+          margin-top: 10rpx;
+        }
+      }
+    }
+    .worksDesc{
+      font-size: 31rpx;
+      color: #363636;
+      margin-left: 35rpx;
+      width: 680rpx;
+      display: block;
+      line-height: 43rpx;
+    }
+    .cut{
+      width: 480rpx;
+      height: 1px;
+      background: #E4E4E4;
+      margin-top: 65rpx;
+      margin-left: 135rpx;
+    }
+    .worksDetail{
+      margin-top: 30rpx;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 0 20rpx;
+      opacity: 0;
+      transform: translateY(50rpx);
+      image{
+        width: 100%;
+        margin-bottom: 10rpx;
+      }
+    }
+    .showworksDetail{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .desginBtn{
+      opacity: 0;
+      transform: translateY(50rpx);
+      transition: .7s .7s;
+      width: 336rpx;
+      height: 90rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background-color: #48C6A9;
+      border-radius: 60rpx;
+      position: fixed;
+      bottom: 40rpx;
+      left: 207rpx;
+      box-shadow: 0 0 20rpx rgba(72,198,169,.2);
+      .designIcon{
+        width: 50rpx;
+        height: 50rpx;
+        margin-right: 12rpx;
+      }
+      .designTxt{
+        font-size: 30rpx;
+      }
+    }
+    .showdesginBtn{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

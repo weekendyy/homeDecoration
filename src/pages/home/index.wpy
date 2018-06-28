@@ -1,0 +1,411 @@
+<template>
+  <view class="indexBox">
+    <!-- 轮播图 -->
+    <banner :bannerImgs.sync='bannerImgs' :isShow.sync='showContent' :seeNum.sync='seeNum'></banner>
+    <!-- 导航按钮 -->
+    <navTab :isShow.sync='showContent' :navTabData.sync="navTabData"></navTab>
+    <!-- 设计方案 -->
+    <view class="project pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .4s;">
+      <view class="project-head">
+        <view class="cut1"></view>
+        <view class="project-head-title">
+          <text class="title">{{fixedData1[0]}}</text>
+          <text class="desc">{{fixedData1[1]}}</text>
+        </view>
+        <view class="more" @tap="switchTab(1)">
+          <text class="moreTxt">更多</text>
+          <view class="cut2"></view>
+        </view>
+      </view>
+      <designShow :show.sync="showContent" :worksDAta.sync="caseData"></designShow>
+    </view>
+    <!-- 设计团队 -->
+    <view class="project">
+      <view class="project-head">
+        <view class="cut1"></view>
+        <view class="project-head-title">
+          <text class="title">{{fixedData1[2]}}</text>
+          <text class="desc">{{fixedData1[3]}}</text>
+        </view>
+      </view>
+      <view class="design-teamScrollBox">
+        <view class="designTeamItem" wx:for="{{designersData}}" wx:key="{{index}}" @tap="toDesignDetail({{item.id}})">
+          <image class="designerIcon" mode="aspectFill" src="{{item.avatar}}"></image>
+          <text class="designer-name ellip-1">{{item.name}}</text>
+          <text class="design-desc ellip-1">{{item.job}}</text>
+        </view>
+        <view wx:if="{{designersData.length === 0}}" class="noneTips">
+          请前往后台添加设计师
+        </view>
+      </view>
+    </view>
+    <!-- 附近工地 -->
+    <view class="project">
+      <view class="project-head">
+        <view class="cut1"></view>
+        <view class="project-head-title">
+          <text class="title">{{fixedData2[0]}}</text>
+          <text class="desc">{{fixedData2[1]}}</text>
+        </view>
+        <button class="positionBtn" open-type="openSetting" wx:if="{{!isLocation}}" bindopensetting="openSetting">
+          <image src="./images/position.png" mode="widthFix" class="positionIcon"></image>
+          <text>定位失败，去授权</text>
+        </button>
+        <view class="more" @tap="switchTab(2)">
+          <text class="moreTxt">更多</text>
+          <view class="cut2"></view>
+        </view>
+      </view>
+      <view class="nearBy">
+        <view class="nearByItem" wx:for="{{nearbyData}}" wx:key="{{index}}" @tap="toWorksite({{item.id}},{{item.cat_name}})">
+          <view class="itemLeft">
+            <text class="itemName ellip-1">{{item.address}}</text>
+            <text class="itemDesc ellip-1">{{item.cat_name}}</text>
+          </view>
+          <view class="itenRight">
+            <view>共<text class="itemNumber">{{item.count}}</text>个工地</view>
+            <image src="./images/righticon.png" mode="widthFix" class="rightIcon"></image>
+          </view>
+          <text class="distance">距{{item.distance}}km</text>
+        </view>
+        <view wx:if="{{nearbyData.length === 0}}" class="noneNearTips">附近暂无小区在施工</view>
+      </view>
+    </view>
+  </view>
+  <login></login>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../../components/loading'
+  import commonMixin from '../../mixins/commonWay'
+  import api from '../../utils/commonMT.js'
+  import homeModel from './homeModel.js'
+  import banner from '../../components/banner'
+  import navTab from '../../components/navtab'
+  import designShow from '../../components/designerShow'
+  import login from '../../components/login'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '家装',
+      enablePullDownRefresh: true,
+      backgroundTextStyle: 'dark'
+    }
+    components = {
+      loading: loading,
+      banner: banner,
+      navTab: navTab,
+      designShow: designShow,
+      login: login
+    }
+
+    data = {
+      showContent: false,
+      bannerImgs: [],
+      navTabData: [{classify_img:'images/navIcon1.png',classify_name:'在线咨询'},
+                  {classify_img:'images/navIcon4.png',classify_name:'户型设计'},
+                  {classify_img:'images/navIcon3.png',classify_name:'免费量房'},
+                  {classify_img:'images/navIcon2.png',classify_name:'装修报价'}],
+      caseData: [],
+      designersData: [],
+      fixedData1: '',
+      fixedData2: '',
+      nearbyData: '',
+      isLocation: false,
+      seeNum: 0
+    }
+
+    mixins = [commonMixin]
+
+    computed = {
+      
+    }
+
+    methods = {
+      switchTab(index){
+        if(index == 1){
+          api.navTo('/pages/works/index')
+        }
+        if(index == 2){
+          api.navTo('/pages/workSite/index')
+        }
+      },
+      openSetting(res){
+        if(res.detail.authSetting['scope.userLocation']){
+          this._getNearByData('重新定位中...','定位成功')
+        } else {
+          api.showTips('授权失败')
+        }
+      },
+      toDesignDetail(id){
+        api.navTo('../../designerCenter/index',{id:id})
+      },
+      toWorksite(id,name){
+        wx.setStorageSync('worksiteId', {
+          id: id,
+          name: name
+        })
+        api.navTo('/pages/workSite/index')
+      }
+    }
+
+    events = {
+      
+    }
+    onLoad() {
+      this._loadData()
+      this._getNearByData()
+    }
+    _loadData(){
+      homeModel.getHomeData({},(res)=>{
+        wx.stopPullDownRefresh()
+        if(res.error === 0){
+          this.bannerImgs = res.data.carousel_index
+          // this.navTabData = res.data.category_index
+          this.caseData = res.data.case_index.cases
+          this.designersData = res.data.designer_index
+          this.fixedData1 = res.data.field
+          this.showContent = true
+          this.seeNum = res.data.view_num
+          if(this.seeNum>=10000){
+            this.seeNum = (this.seeNum/10000).toFixed(1) + "万"
+          }
+          this.$apply()
+        } else {
+          api.showTips(res.msg)
+        }
+      })
+    }
+    _getNearByData(tips1,tips2){
+      api.getGeoAndUserInfo((res)=>{
+        let logLat = ''
+        if(res){
+          logLat = res.latitude+','+res.longitude
+          this.isLocation = true
+        } else {
+          logLat = ''
+          wx.showModal({
+            title: '地理位置授权',
+            content: '去重新授权位置信息',
+            success: function(res) {
+              if (res.confirm) {
+                wx.pageScrollTo({
+                  scrollTop: 700,
+                  duration: 500
+                })
+              } else if (res.cancel) {
+                api.showTips("取消授权")
+              }
+            }
+          })
+        }
+        tips1 && api.showTips(tips1)
+        homeModel.getNearbyData({log_lat: logLat},(resData)=>{
+          wx.stopPullDownRefresh()  
+          if(resData.error === 0){
+            tips2 && api.showTips(tips2)
+            this.fixedData2 = resData.data.field
+            this.nearbyData = resData.data.data
+            this.showContent = true
+            this.$apply()
+          } else {
+            api.showTips(resData.msg)
+          }
+        })
+      })
+    }
+    onPullDownRefresh(){
+      this._loadData()
+      this._getNearByData()
+    }
+    onShow(){
+    }
+    onShareAppMessage(){
+      
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+    background-color: #F3F7F9;
+    height: 100%;
+  }
+  .project{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 30rpx;
+    background-color: #fff;
+    margin-bottom: 20rpx;
+    .project-head{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      height: 80rpx;
+      .cut1{
+        width: 2px;
+        height: 20rpx;
+        background-color: #757575;
+      }
+      .project-head-title{
+        display: flex;
+        align-items: baseline;
+        flex: 1;
+        .title{
+          font-size: 24rpx;
+          color: #898989;
+          margin: 0 15rpx;
+        }
+        .desc{
+          font-size: 21rpx;
+          color: #C3C3C3;
+        }
+      }
+      .positionBtn{
+        display: flex;
+        align-items: center;
+        background-color: transparent;
+        padding: 0;
+        &::after{
+          content: none;
+        }
+        .positionIcon{
+          width: 30rpx;
+          height: 30rpx;
+        }
+        text{
+          color: #999;
+          font-size: 23rpx;
+          margin-left: 10rpx;
+        }
+      }
+      .more{
+        width: 100rpx;
+        height: 60rpx;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        .moreTxt{
+          font-size: 22rpx;
+          color: #888;
+        }
+        .cut2{
+          width: 0;
+          height: 0;
+          border-style: solid;
+          border-width: 5px 5px 5px 5px;
+          border-color: #888 transparent transparent transparent;
+          margin-top: 5px;
+          margin-left: 10rpx;
+        }
+      }
+    }
+    .design-teamScrollBox{
+      width: 100%;
+      display: flex;
+      overflow: scroll;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10rpx;
+      .designTeamItem{
+        flex: 0 0 160rpx;
+        height: 230rpx;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        .designerIcon{
+          width: 100rpx;
+          height: 100rpx;
+          border-radius: 100%;
+          background-color: #48C6A9;
+          margin-top: 30rpx;
+        }
+        .designer-name{
+          font-size: 30rpx;
+          font-weight: 600;
+          margin: 13rpx 0 18rpx;
+          width: 100%;
+          text-align: center;
+        }
+        .design-desc{
+          font-size: 24rpx;
+          color: #999;
+          width: 100%;
+          text-align: center;
+        }
+      }
+    }
+    .noneTips{
+      width: 600rpx;
+      height: 100rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 28rpx;
+    }
+    .nearBy{
+      width: 100%;
+      padding-bottom: 30rpx;
+      .nearByItem{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        height: 140rpx;
+        justify-content: space-between;
+        border-bottom: 1px solid #F1F1F1;
+        position: relative;
+        .itemLeft{
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          flex: 1;
+          .itemName{
+            font-size: 30rpx;
+            color: #323332;
+            width: 480rpx;
+          }
+          .itemDesc{
+            font-size: 25rpx;
+            color: #9C9C9C;
+            margin-top: 15rpx;
+            width: 480rpx;
+          }
+        }
+        .itenRight{
+          font-size: 26rpx;
+          display: flex;
+          align-items: center;
+          .itemNumber{
+            color: #48C6A9;
+            font-weight: 600;
+            margin: 0 3rpx;
+          }
+          .rightIcon{
+            width: 30rpx;
+            height: 30rpx;
+            margin-left: 30rpx;
+          }
+        }
+        .distance{
+          position: absolute;
+          bottom: 10rpx;
+          right: 10rpx;
+          color: #999;
+          font-size: 21rpx;
+        }
+      }
+      .noneNearTips{
+        width: 100%;
+        height: 100rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 28rpx;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,300 @@
+<template>
+  <import src="../wxParse/wxParse.wxml"/>
+  <view class="indexBox">
+    <text class="worksite-title pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .1s">{{indexData.case_name}}</text>
+    <view class="locationBox">
+      <view class="locationBox-left pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .3s">
+        <text class="addressInfo">{{indexData.address}}</text>
+        <text class="address-text" wx:if="{{indexData.distance}}">{{indexData.distance}}Km</text>
+        <button class="addresBtn" open-type="openSetting" bindopensetting="openSetting" wx:if="{{!indexData.distance && indexData.log_lat}}">定位失败，重新授权</button>
+        <button class="addresBtn" wx:if="{{!indexData.log_lat}}">未设置位置信息</button>
+      </view>
+      <image src="./images/location.png" mode="widthFix" class="locationIcon pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .5s" @tap="openMap"></image>
+    </view>
+    <view class="designerInfo">
+      <image src="{{indexData.design_designer.avatar}}" mode="aspectFill" class="designerIcon {{showContent?'showdesignerIcon':''}}" @tap="toDesigner"></image>
+      <view class="designer">
+        <view class="designer-top">
+          <text class="designer-name ellip-1 pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .4s">{{indexData.design_designer.name}}</text>
+          <view class="bespeakBtn pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .5s" @tap="bespeak">预约</view>
+        </view>
+        <text class="designDesc ellip-3 pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .6s">{{indexData.design_designer.summary}}</text>
+      </view>
+    </view>
+    <view class="worksiteDetail">
+      <text class="worksiteDetail-title pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .7s">项目详情</text>
+      <view class="worksDetail pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .7s">
+        <template is="wxParse" data="{{wxParseData:article.nodes}}"/>
+      </view>
+    </view>
+    <view style="height: 170rpx;"></view>
+    <view class="desginBtn {{showContent?'showdesginBtn':''}}" @tap="bespeak">
+      <image src="./images/design.png" mode="widthFix" class="designIcon"></image>
+      <text class="designTxt">请他帮我设计</text>
+    </view>
+  </view>
+  <login></login>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../components/loading'
+  import api from '../utils/commonMT.js'
+  import wxParse from '../wxParse/wxParse'
+  import DesignerModel from './designer.js'
+  import login from '../components/login'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '施工详情',
+      navigationBarTextStyle: 'black',
+      backgroundColorTop: '#fff',
+      backgroundColorBottom: '#fff'
+    }
+    components = {
+      loading: loading,
+      login: login
+    }
+
+    data = {
+      showContent: false,
+      id: '',
+      indexData: ''
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      bespeak(){
+        api.navTo('../bespeak/measure')
+      },
+      toDesigner(){
+        api.navTo('./index',{id:this.indexData.design_designer.id})
+      },
+      openMap(){
+        if(!this.indexData.log_lat){
+          api.showTips("未设置位置信息")
+          return false
+        }
+        if(!this.indexData.distance){
+          api.showTips("未获取您的位置授权")
+          return false
+        }
+        api.openMap(this.indexData.log_lat,this.indexData.case_name,this.indexData.address)
+      },
+      openSetting(res){
+        if(res.detail.authSetting['scope.userLocation']){
+          this._loadData('重新定位中...','定位成功')
+        } else {
+          api.showTips('授权失败')
+        }
+      }
+    }
+
+    events = {
+      
+    }
+    onLoad(e) {
+      this.id = e.id
+      this._loadData()
+    }
+    _loadData(tips1,tips2){
+      if(tips1){
+        api.showTips(tips1)
+      }
+      api.getGeoAndUserInfo((resData)=>{
+        console.log(resData)
+        let query = {
+          id: this.id
+        }
+        if(resData){
+          query.log_lat = resData.latitude + ',' + resData.longitude
+        }
+        DesignerModel.getWorksDetail(query,(res)=>{
+          if(tips2){
+            api.showTips(tips2)
+          }
+          if(res.error === 0){
+            this.indexData = res.data
+            wxParse.wxParse('article', 'html', res.data.details, this, 0)
+            this.showContent = true
+            this.$apply()
+          } else {
+            api.showTips(res.msg)
+          }
+        })
+      })
+    }
+    onPullDownRefresh(){
+      this._loadData()
+    }
+    onShow(){
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+    background-color: #FFFFFF;
+  }
+  .indexBox{
+    width: 100%;
+    padding-top: 50rpx;
+    .worksite-title{
+      font-size: 41rpx;
+      font-weight: 600;
+      margin-left: 30rpx;
+      width: 690rpx;
+      display: block;
+      line-height: 53rpx;
+    }
+    .locationBox{
+      width: 690rpx;
+      margin-left: 30rpx;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #F0F0F0;
+      justify-content: space-between;
+      padding: 40rpx 0;
+      .locationBox-left{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 580rpx;
+        .addressInfo{
+          color: #0F0F0F;
+          font-size: 32rpx;
+          width: 90%;
+          display: block;
+          line-height: 43rpx;
+        }
+        .address-text{
+          font-size: 23rpx;
+          color: #8D8D8D;
+          margin-top: 30rpx;
+        }
+        .addresBtn{
+          background-color: transparent;
+          padding: 0;
+          margin: 0;
+          width: 250rpx;
+          height: 50rpx;
+          font-size: 28rpx;
+          color: #DE5246;
+          text-align: left;
+          &::after{
+            content: none;
+          }
+        }
+      }
+      .locationIcon{
+        width: 90rpx;
+        height: 90rpx;
+      }
+    }
+    .designerInfo{
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 30rpx;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 50rpx;
+      .designerIcon{
+        width: 125rpx;
+        height: 125rpx;
+        border-radius: 100%;
+        background-color: #48C6A9;
+        opacity: 0;
+        transition: .7s .8s;
+        transform: rotate(100deg) scale(0.5);
+      }
+      .showdesignerIcon{
+        transform: rotate(0) scale(1);
+        opacity: 1;
+      }
+      .designer{
+        width: 540rpx;
+        display: flex;
+        flex-direction: column;
+        .designer-top{
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          .designer-name{
+            font-size: 32rpx;
+            color: #353535;
+            width: 380rpx;
+          }
+          .bespeakBtn{
+            background-color: #F4FCFC;
+            width: 150rpx;
+            height: 60rpx;
+            border-radius: 40rpx;
+            color: #2AB8B5;
+            font-size: 25rpx;
+            text-align: center;
+            line-height: 60rpx;
+          }
+        }
+        .designDesc{
+          font-size: 26rpx;
+          color: #898989;
+          line-height: 36rpx;
+          width: 100%;
+          margin-top: 10rpx;
+        }
+      }
+    }
+    .worksiteDetail{
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 30rpx;
+      margin-top: 50rpx;
+      .worksiteDetail-title{
+        font-size: 40rpx;
+        font-weight: 600;
+      }
+      .worksDetail{
+        width: 100%;
+        box-sizing: border-box;
+        padding: 30rpx 0 0;
+        image{
+          width: 100%;
+          margin-bottom: 10rpx;
+        }
+      }
+    }
+    .desginBtn{
+      opacity: 0;
+      transform: translateY(50rpx);
+      transition: .7s .7s;
+      width: 336rpx;
+      height: 90rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background-color: #48C6A9;
+      border-radius: 60rpx;
+      position: fixed;
+      bottom: 40rpx;
+      left: 207rpx;
+      box-shadow: 0 0 20rpx rgba(72,198,169,.2);
+      .designIcon{
+        width: 50rpx;
+        height: 50rpx;
+        margin-right: 12rpx;
+      }
+      .designTxt{
+        font-size: 30rpx;
+      }
+    }
+    .showdesginBtn{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

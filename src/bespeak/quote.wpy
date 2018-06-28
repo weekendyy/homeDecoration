@@ -1,0 +1,162 @@
+<template>
+  <view class="indexBox">
+    <image src="./images/quote.jpg" mode="widthFix" class="bgPic"></image>
+    <input type="" name="" value="{{name}}" maxlength='15' cursor-spacing="20" class="yourName" bindinput="nameInp" placeholder="请输入您的称呼" />
+    <input type="number" value="{{phone}}" maxlength='11' cursor-spacing="100" name="" class="yourPhone" bindinput="phoneInp" placeholder="请输入手机号码" />
+    <input type="digit" name="" value="{{area}}" cursor-spacing="100" maxlength='10' class="yourPhone homeArea" bindinput="areaInp" placeholder="请输入房屋面积" />
+    <text class="fixedTxt">m²</text>
+    <button @tap="postData">获取专属设计方案</button>
+  </view>
+  <!-- 加载动画 -->
+  <loading :load.sync="showContent"></loading>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import loading from '../components/loading'
+  import api from '../utils/commonMT.js'
+  import BespeakModel from './bespeakModel.js'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: "#fff",
+      navigationBarTitleText: '装修报价',
+      backgroundTextStyle: 'dark'
+    }
+    components = {
+      loading: loading
+    }
+
+    data = {
+      showContent: false,
+      name: '',
+      phone: '',
+      area: ''
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      nameInp(e){
+        this.name = e.detail.value
+      },
+      phoneInp(e){
+        this.phone = e.detail.value
+      },
+      areaInp(e){
+        this.area = e.detail.value
+      },
+      postData(){
+        if(this.name.length == 0 || this.name.split(" ").join("").length == 0){
+          api.showTips('姓名不能为空')
+          return false
+        }
+        if(api.verifyPhoneNumber(this.phone)){
+          if(!api.isRealNum(this.area) || this.area.split(" ").join("").length == 0){
+            api.showTips('面积格式错误')
+            return false
+          }
+          api.showTips('预约中...')
+          let query = {
+            name: this.name,
+            phone: this.phone,
+            area: this.area,
+            type: '2'
+          }
+          BespeakModel.getAboutData(query,(res)=>{
+            if(res.error === 0){
+              api.showTips('预约成功')
+              this.name = ''
+              this.phone = ''
+              this.area = ''
+              this.$apply()
+            } else {
+              api.showTips(res.msg)
+            }
+          })
+        }
+      }
+    }
+
+    events = {
+      
+    }
+    onLoad() {
+      this._loadData()
+    }
+    _loadData(){
+      setTimeout(()=>{
+        this.showContent = true
+        this.$apply()
+      },500)
+    }
+    onPullDownRefresh(){
+      this._loadData()
+    }
+    onShow(){
+    }
+  }
+</script>
+<style lang="less">
+  Page{
+  }
+  .indexBox{
+    width: 100%;
+    .bgPic{
+      width: 100%;
+      height: 100%;
+    }
+    .yourName{
+      width: 690rpx;
+      height: 90rpx;
+      border-radius: 10rpx;
+      background-color: #fff;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0 30rpx;
+      position: absolute;
+      left: 30rpx;
+      top: 620rpx;
+      font-size: 30rpx;
+    }
+    .yourPhone{
+      width: 690rpx;
+      height: 90rpx;
+      border-radius: 10rpx;
+      background-color: #fff;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0 30rpx;
+      position: absolute;
+      left: 30rpx;
+      top: 740rpx;
+      font-size: 30rpx;
+    }
+    .homeArea{
+      top: 860rpx;
+    }
+    .fixedTxt{
+      position: absolute;
+      right: 50rpx;
+      top: 885rpx;
+      font-size: 35rpx;
+      color: #353535;
+      z-index: 3;
+    }
+    button{
+      width: 690rpx;
+      height: 90rpx;
+      background-color: #FFD217;
+      font-size: 35rpx;
+      color: #424035;
+      position: absolute;
+      left: 30rpx;
+      top: 1000rpx;
+      border-radius: 10rpx;
+      &::after{
+        content: none;
+      }
+    }
+  }
+</style>

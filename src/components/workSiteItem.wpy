@@ -1,0 +1,144 @@
+<template>
+	<view class="workSiteItemBox pre-initShow {{showItem?'showworkSiteItem':''}} {{type == '2'? 'type2' :''}}" @tap="toWorksitedetail({{item.id}})">
+		<text class="workSiteTitle ellip-1">{{item.case_name}}</text>
+		<view class="workSiteInfo">
+			<view class="workSiteInfo-left">
+				<image src="{{item.design_designer.avatar}}" mode="aspectFill" class="designerIcon"></image>
+				<text class="designerName">{{item.design_designer.name}}</text>
+				<text class="designTag">#{{item.design_designer.job}}#</text>
+			</view>
+			<text class="workSiteTime">{{item.create_at}}</text>
+		</view>
+		<view class="workSiteInfo-imgs">
+			<block wx:for="{{item.img_arr}}" wx:key="{{index}}">
+				<image src="{{item}}" mode="aspectFill" class="workSiteImg" style="margin-right:{{index == 3 ? '0' : '15rpx'}}"></image>
+			</block>
+		</view>
+		<view class="workSiteBottom">
+			<view class="workSiteSeePeople">
+				<block wx:for="{{item.view_logs.logs_data}}" wx:key="{{index}}" wx:if="{{index<6}}">
+					<image src="{{item.avatar}}" mode="aspectFill" class="workSiteSeePeopleIcon"></image>
+				</block>
+			</view>
+			<text class="workSiteSeePeopleTxt">等{{item.view_logs.count}}人有兴趣</text>
+		</view>
+	</view>
+</template>
+<script>
+	import wepy from 'wepy'
+	import api from '../utils/commonMT.js'
+	export default class classify extends wepy.component {
+		props = {
+			showItem: Boolean,
+			type: String
+		}
+		data = {
+			
+		}
+		computed = {
+			
+		}
+		components = {
+			
+		}
+		methods = {
+			toWorksitedetail(id){
+				api.navTo('/designerCenter/worksiteDetail',{id:id})
+			}
+		}
+		onLoad(){
+			
+		}
+	}
+</script>
+<style type="less">
+	.workSiteItemBox{
+		width: 100%;
+		box-sizing: border-box;
+		padding: 20rpx 30rpx;
+		background-color: #fff;
+		margin-bottom: 20rpx;
+		z-index: 1;
+		.workSiteTitle{
+			font-size: 30rpx;
+			color: #000;
+			font-weight: 600;
+			display: block;
+			width: 700rpx;
+		}
+		.workSiteInfo{
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin: 25rpx 0;
+			.workSiteInfo-left{
+				display: flex;
+				align-items: center;
+				.designerIcon{
+					width: 40rpx;
+					height: 40rpx;
+					border-radius: 100%;
+					background-color: #BFD1CE;
+				}
+				.designerName{
+					font-size: 27rpx;
+					color: #353535;
+					margin: 0 15rpx;
+				}
+				.designTag{
+					font-size: 27rpx;
+					color: #48C6A9;
+				}
+			}
+			.workSiteTime{
+				color: #888;
+				font-size: 27rpx;
+			}
+		}
+		.workSiteInfo-imgs{
+			width: 100%;
+			display: flex;
+			overflow-x: scroll;
+			-webkit-overflow-scrolling:touch;
+			.workSiteImg{
+				flex: 0 0 220rpx;
+				height: 160rpx;
+				background-color: #BFD1CE;
+				margin-right: 10rpx;
+			}
+		}
+		.workSiteBottom{
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin: 30rpx 0 20rpx;
+			.workSiteSeePeople{
+				max-width: 490rpx;
+				.workSiteSeePeopleIcon{
+					width: 60rpx;
+					height: 60rpx;
+					background-color: #888;
+					border-radius: 100%;
+					margin-right: 20rpx;
+				}
+			}
+			.workSiteSeePeopleTxt{
+				font-size: 26rpx;
+				color: #888;
+			}
+		}
+	}
+	.showworkSiteItem{
+		opacity: 1;
+    transform: translateX(0);
+    transition: .5s;
+	}
+	.type2{
+		transform: scale(0.92);
+		border-radius: 10rpx;
+		margin-top:-15rpx;
+		border: 1px solid #e5e5e5;
+		box-shadow: 0 0 16px rgba(0,0,0,0.05);
+	}
+</style>

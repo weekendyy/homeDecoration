@@ -1,0 +1,10 @@
+<template name="loading">
+	<view class="loadingBox">
+		<view class="loadingBcenter">
+			<view class="loading-move"></view>
+			<view class="loadingcover"></view>
+			<view class="center-cover"></view>
+		</view>
+		<text>{{loadingTxt}}</text>
+	</view>
+</template>
