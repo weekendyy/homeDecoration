@@ -83,7 +83,7 @@ class commonMT extends Base {
   }   
   //小程序跳转
   navTo(url,query){
-    if(url == '/pages/home/index' || url == '/pages/works/index' || url == '/pages/about/index' || url == '/pages/workSite/index'){
+    if(url == '/pages/index/index' || url == '/pages/works/index' || url == '/pages/about/index' || url == '/pages/workSite/index'){
       wx.switchTab({url:url})
     } else {
       wx.navigateTo({

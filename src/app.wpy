@@ -72,7 +72,7 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/home/index',
+      'pages/index/index',
       'pages/works/index',
       'pages/about/index',
       'pages/workSite/index'
@@ -105,7 +105,7 @@ export default class extends wepy.app {
       'borderStyle': 'black',
       'list': [
         {
-          'pagePath': 'pages/home/index',
+          'pagePath': 'pages/index/index',
           'iconPath': './images/tabBar/home.png',
           'selectedIconPath': './images/tabBar/home-active.png',
           'text': '首页'

@@ -168,11 +168,12 @@
           this.caseData = res.data.case_index.cases
           this.designersData = res.data.designer_index
           this.fixedData1 = res.data.field
-          this.showContent = true
           this.seeNum = res.data.view_num
+          // this.$apply()
           if(this.seeNum>=10000){
             this.seeNum = (this.seeNum/10000).toFixed(1) + "万"
           }
+          this.showContent = true
           this.$apply()
         } else {
           api.showTips(res.msg)
@@ -209,7 +210,6 @@
             tips2 && api.showTips(tips2)
             this.fixedData2 = resData.data.field
             this.nearbyData = resData.data.data
-            this.showContent = true
             this.$apply()
           } else {
             api.showTips(resData.msg)

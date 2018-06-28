@@ -14,7 +14,7 @@
         </block>
       </swiper>
       <view class="see_num {{isShow?'showSee_num':''}}">
-        <image src="../pages/home/images/seenum.png" mode="widthFix" class="seeNumIcon {{isShow?'showSeeIcon':''}}"></image>
+        <image src="../pages/index/images/seenum.png" mode="widthFix" class="seeNumIcon {{isShow?'showSeeIcon':''}}"></image>
         <text>关注: {{seeNum}}</text>
       </view>
     </view>

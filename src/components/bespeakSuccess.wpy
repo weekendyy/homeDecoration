@@ -1,0 +1,101 @@
+<template>
+  <view class="successBox">
+    <view class="cover {{showSuccess?'showCover':''}}"></view>
+    <image src="./images/bespeakSuccess.png" mode="widthFix" class="successIcon {{showSuccess?'showSuccessicon':''}}"></image>
+    <view class="closeBtn {{showSuccess?'showBtn':''}}" @tap="closeBtn">确定</view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class BespeakSuccess extends wepy.component {
+    props = {
+      
+    }
+    data = {
+      showSuccess: false
+    }
+    computed = {
+      
+    }
+    events = {
+      showSuccess(){
+        this.showSuccess = true
+      }
+    }
+    components = {
+      
+    }
+    methods = {
+      closeBtn(){
+        this.showSuccess = false
+        this.$apply()
+      }
+    }
+    onLoad(){
+    }
+  }
+</script>
+<style type="less">
+  .successBox{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+    .cover{
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,.6);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      opacity: 0;
+      transition: .4s;
+    }
+    .showCover{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .successIcon{
+      width: 700rpx;
+      height: 700rpx;
+      position: absolute;
+      top: 0;
+      left: 25rpx;
+      z-index: 2;
+      opacity: 0;
+      transition: .4s;
+      transform: scale(.5);
+    }
+    .showSuccessicon{
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    .closeBtn{
+      width: 100rpx;
+      height: 60rpx;
+      color: #fff;
+      font-size: 28rpx;
+      text-align: center;
+      line-height: 60rpx;
+      border-radius: 10rpx;
+      background-color: #FFC80B;
+      position: absolute;
+      top: 630rpx;
+      left: 325rpx;
+      z-index: 3;
+      opacity: 0;
+      transition: .4s;
+      transform: scale(.5);
+    }
+    .showBtn{
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+  }
+</style>

@@ -5,6 +5,7 @@
     <input type="number" cursor-spacing="100" name="" value="{{phone}}" maxlength='11' bindinput="phoneInp" class="yourPhone" placeholder="请输入手机号码" />
     <button @tap="postData">获取专属设计方案</button>
   </view>
+  <bespeakSuccess></bespeakSuccess>
   <!-- 加载动画 -->
   <loading :load.sync="showContent"></loading>
 </template>
@@ -14,6 +15,7 @@
   import loading from '../components/loading'
   import api from '../utils/commonMT.js'
   import BespeakModel from './bespeakModel.js'
+  import bespeakSuccess from '../components/bespeakSuccess'
   export default class Index extends wepy.page {
     config = {
       navigationBarBackgroundColor: "#fff",
@@ -21,7 +23,8 @@
       backgroundTextStyle: 'dark'
     }
     components = {
-      loading: loading
+      loading: loading,
+      bespeakSuccess: bespeakSuccess
     }
 
     data = {
@@ -55,7 +58,7 @@
           }
           BespeakModel.getAboutData(query,(res)=>{
             if(res.error === 0){
-              api.showTips('预约成功')
+              this.$broadcast('showSuccess')
               this.name = ''
               this.phone = ''
               this.$apply()
