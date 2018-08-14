@@ -1,24 +1,24 @@
 <template>
   <import src="../../wxParse/wxParse.wxml"/>
   <view class="indexBox">
-    <view class="version {{showVersion?'showVersion':''}}">V1.1.1</view>
+    <view class="version {{showVersion?'showVersion':''}}">V1.1.2</view>
     <image src="{{indexData.thumb_img}}" mode="aspectFill" class="aboutPic pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .1s" @longpress="seeVersion" @touchend="hideVersion"></image>
     <text class="about-title pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .3s">{{indexData.name}}</text>
-    <view class="aboutItem pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .5s">
+    <view class="aboutItem pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .5s" @tap="openMap({{indexData.log_lat}})">
       <text class="aboutItem-title">门店地址</text>
       <view class="aboutItem-content">
         <text class="content-txt">{{indexData.address}}</text>
-        <view class="content-right" @tap="openMap({{indexData.log_lat}})">
+        <view class="content-right">
           <view class="cut"></view>
           <image src="./images/location.png" mode="widthFix" class="locationIcon"></image>
         </view>
       </view>
     </view>
-    <view class="aboutItem pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .7s">
+    <view class="aboutItem pre-initShow {{showContent?'initShow':''}}" style="transition: .5s .7s" @tap="makePhoneCall({{indexData.telephone}})">
       <text class="aboutItem-title">联系电话</text>
       <view class="aboutItem-content">
         <text class="content-txt">{{indexData.telephone}}</text>
-        <view class="content-right" @tap="makePhoneCall({{indexData.telephone}})">
+        <view class="content-right">
           <view class="cut"></view>
           <image src="./images/phone.png" mode="widthFix" class="locationIcon"></image>
         </view>
