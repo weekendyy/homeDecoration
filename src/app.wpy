@@ -3,7 +3,7 @@
     height: 100%;
   }
   text{
-    line-height:1;
+    line-height:1.1em;
     font-family: 'PingFang SC';
   }
   image{
@@ -16,7 +16,7 @@
   .initShow{
     opacity: 1;
     transform: translateX(0);
-    transition: .5s;
+    transition: .3s;
   }
   @font-face {
     font-family: 'workNumber';
@@ -66,13 +66,14 @@ import wepy from 'wepy'
 import { setStore } from 'wepy-redux'
 import configStore from './store'
 import TokenModel from './utils/token'
+import viewModel from './utils/viewModel.js'
 const store = configStore()
 setStore(store)
 
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index/index',
+      'pages/Index/index',
       'pages/works/index',
       'pages/about/index',
       'pages/workSite/index'
@@ -105,7 +106,7 @@ export default class extends wepy.app {
       'borderStyle': 'black',
       'list': [
         {
-          'pagePath': 'pages/index/index',
+          'pagePath': 'pages/Index/index',
           'iconPath': './images/tabBar/home.png',
           'selectedIconPath': './images/tabBar/home-active.png',
           'text': '首页'
@@ -145,7 +146,11 @@ export default class extends wepy.app {
   constructor () {
     super()
   }
-
+  onShow(){
+    viewModel.postViewData({},()=>{
+      console.log('浏览+1')
+    })
+  }
   onLaunch() {
     TokenModel.verify()
     const res = wx.getSystemInfoSync()
