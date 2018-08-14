@@ -58,6 +58,7 @@
           }
           BespeakModel.getAboutData(query,(res)=>{
             if(res.error === 0){
+              wx.hideLoading()
               this.name = ''
               this.phone = ''
               this.$broadcast('showSuccess')
