@@ -200,5 +200,7 @@
   Page{
     background-color: #F8F8F8;
   }
-  
+  .indexBox{
+    overflow: hidden;
+  }
 </style>
