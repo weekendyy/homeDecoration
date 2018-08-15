@@ -39,6 +39,30 @@
         </view>
       </view>
     </view>
+    <!-- 经典推荐 -->
+    <!-- <view class="recommend" wx:if="{{caseData.length != 0}}">
+      <view class="project-head">
+        <view class="cut1"></view>
+        <view class="project-head-title">
+          <text class="title">经典推荐</text>
+        </view>
+        <view class="more" @tap="switchTab(1)">
+          <text class="moreTxt">更多</text>
+          <view class="cut2"></view>
+        </view>
+      </view>
+      <block wx:for="{{caseData}}" wx:key="{{index}}">
+        <view class="recommendItem1" @tap="toWorksDetail({{item.id}})" wx:if="{{index == 0}}">
+          <image src="{{item.thumb_img}}" mode="aspectFill" class="mainPic"></image>
+          <text class="recommendItem1-title">{{item.case_name}}</text>
+          <text class="recommendItem1-desc">{{item.desc}}</text>
+        </view>
+        <view class="recommendItem1 item2" @tap="toWorksDetail({{item.id}})" wx:if="{{index != 0}}">
+          <image src="{{item.thumb_img}}" mode="aspectFill" class="mainPic"></image>
+          <text class="recommendItem1-title item2Txt ellip-2">{{item.case_name}}</text>
+        </view>
+      </block>
+    </view> -->
     <!-- 附近工地 -->
     <view class="project">
       <view class="project-head">
@@ -149,6 +173,9 @@
           name: name
         })
         api.navTo('/pages/workSite/index')
+      },
+      toWorksDetail(id){
+        api.navTo('../../designerCenter/worksDetail',{id: id})
       }
     }
 
@@ -233,75 +260,129 @@
     background-color: #F3F7F9;
     height: 100%;
   }
+  .recommend{
+    width: 100%;
+    background-color: #fff;
+    box-sizing: border-box;
+    padding: 0 30rpx;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    .recommendItem1{
+      width: 100%;
+      border-radius: 10rpx;
+      border: 1px solid #F1F1F1;
+      margin-bottom: 20rpx;
+      overflow: hidden;
+      padding-bottom: 50rpx;
+      .mainPic{
+        width: 100%;
+        height: 345rpx;
+        background-color: #EDECE8;
+      }
+      .recommendItem1-title{
+        font-size: 34rpx;
+        font-size: 600;
+        display: block;
+        box-sizing: border-box;
+        padding: 0 20rpx;
+        margin: 40rpx 0 30rpx;
+        line-height: 49rpx;
+      }
+      .recommendItem1-desc{
+        display: block;
+        font-size: 26rpx;
+        color: #8C8C8C;
+        box-sizing: border-box;
+        padding: 0 20rpx;
+        line-height: 30rpx;
+      }
+    }
+    .item2{
+      width: 330rpx;
+      height: 370rpx;
+      border-radius: 10rpx;
+      overflow: hidden;
+      border: 1px solid #EFEFEF;
+      padding-bottom: 20rpx;
+      .mainPic{
+        height: 240rpx;
+      }
+      .item2Txt{
+        display: -webkit-box;
+        margin-top: 20rpx;
+      }
+    }
+  }
+  .project-head{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 80rpx;
+    .cut1{
+      width: 2px;
+      height: 20rpx;
+      background-color: #757575;
+    }
+    .project-head-title{
+      display: flex;
+      align-items: baseline;
+      flex: 1;
+      .title{
+        font-size: 24rpx;
+        color: #898989;
+        margin: 0 15rpx;
+      }
+      .desc{
+        font-size: 21rpx;
+        color: #C3C3C3;
+      }
+    }
+    .positionBtn{
+      display: flex;
+      align-items: center;
+      background-color: transparent;
+      padding: 0;
+      &::after{
+        content: none;
+      }
+      .positionIcon{
+        width: 30rpx;
+        height: 30rpx;
+      }
+      text{
+        color: #999;
+        font-size: 23rpx;
+        margin-left: 10rpx;
+      }
+    }
+    .more{
+      width: 100rpx;
+      height: 60rpx;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      .moreTxt{
+        font-size: 22rpx;
+        color: #888;
+      }
+      .cut2{
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 5px 5px 5px 5px;
+        border-color: #888 transparent transparent transparent;
+        margin-top: 5px;
+        margin-left: 10rpx;
+      }
+    }
+  }
   .project{
     width: 100%;
     box-sizing: border-box;
     padding: 0 30rpx;
     background-color: #fff;
     margin-bottom: 20rpx;
-    .project-head{
-      width: 100%;
-      display: flex;
-      align-items: center;
-      height: 80rpx;
-      .cut1{
-        width: 2px;
-        height: 20rpx;
-        background-color: #757575;
-      }
-      .project-head-title{
-        display: flex;
-        align-items: baseline;
-        flex: 1;
-        .title{
-          font-size: 24rpx;
-          color: #898989;
-          margin: 0 15rpx;
-        }
-        .desc{
-          font-size: 21rpx;
-          color: #C3C3C3;
-        }
-      }
-      .positionBtn{
-        display: flex;
-        align-items: center;
-        background-color: transparent;
-        padding: 0;
-        &::after{
-          content: none;
-        }
-        .positionIcon{
-          width: 30rpx;
-          height: 30rpx;
-        }
-        text{
-          color: #999;
-          font-size: 23rpx;
-          margin-left: 10rpx;
-        }
-      }
-      .more{
-        width: 100rpx;
-        height: 60rpx;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        .moreTxt{
-          font-size: 22rpx;
-          color: #888;
-        }
-        .cut2{
-          width: 0;
-          height: 0;
-          border-style: solid;
-          border-width: 5px 5px 5px 5px;
-          border-color: #888 transparent transparent transparent;
-          margin-top: 5px;
-          margin-left: 10rpx;
-        }
-      }
-    }
     .design-teamScrollBox{
       width: 100%;
       display: flex;
